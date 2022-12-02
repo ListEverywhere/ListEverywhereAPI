@@ -37,6 +37,7 @@ public class TempUsersDataService implements UsersDataServiceInterface {
 
 	@Override
 	public int addUser(UserModel user) {
+		user.setId(users.size() + 1);
 		if (users.add(user)) {
 			return 1;
 		}
