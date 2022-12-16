@@ -3,8 +3,6 @@ package com.gcep.mapper;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import javax.swing.tree.TreePath;
-
 import org.springframework.jdbc.core.RowMapper;
 
 import com.gcep.model.UserModel;
