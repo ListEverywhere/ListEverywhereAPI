@@ -16,8 +16,12 @@ public class ListMapper implements RowMapper<ListModel> {
 
 	@Override
 	public ListModel mapRow(ResultSet rs, int rowNum) throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
+		return new ListModel(rs.getInt("list_id"),
+				rs.getString("list_name"),
+				rs.getDate("creation_date").toLocalDate(),
+				rs.getDate("last_modified").toLocalDate(),
+				rs.getInt("user_id"),
+				null);
 	}
 	
 	

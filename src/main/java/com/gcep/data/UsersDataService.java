@@ -43,7 +43,7 @@ public class UsersDataService implements UsersDataServiceInterface {
 			user = jdbcTemplate.queryForObject("SELECT * FROM users WHERE user_id=?", new UserMapper(), new Object[] {id});
 		} catch (Exception e) {
 			// an error with the database has occurred
-			throw new DatabaseErrorException("There was an error accessing the database.");
+			throw new DatabaseErrorException();
 		}
 		
 		return user;
@@ -57,7 +57,7 @@ public class UsersDataService implements UsersDataServiceInterface {
 			users = jdbcTemplate.query("SELECT * FROM users", new UserMapper());
 		} catch (Exception e) {
 			// an error with the database has occurred
-			throw new DatabaseErrorException("There was an error accessing the database.");
+			throw new DatabaseErrorException();
 		}
 		
 		return users;
@@ -77,7 +77,7 @@ public class UsersDataService implements UsersDataServiceInterface {
 					user.getPassword());
 		} catch (Exception e) {
 			// an error with the database has occurred
-			throw new DatabaseErrorException("There was an error accessing the database.");
+			throw new DatabaseErrorException();
 		}
 		return result;
 	}
@@ -90,7 +90,7 @@ public class UsersDataService implements UsersDataServiceInterface {
 			result = jdbcTemplate.update("DELETE FROM users WHERE user_id=?", id);
 		} catch (Exception e) {
 			// an error with the database has occurred
-			throw new DatabaseErrorException("There was an error accessing the database.");
+			throw new DatabaseErrorException();
 		}
 		return result > 0;
 	}
@@ -110,7 +110,7 @@ public class UsersDataService implements UsersDataServiceInterface {
 					updated.getId());
 		} catch (Exception e) {
 			// an error with the database has occurred
-			throw new DatabaseErrorException("There was an error accessing the database.");
+			throw new DatabaseErrorException();
 		}
 		if (result > 0) {
 			return updated;

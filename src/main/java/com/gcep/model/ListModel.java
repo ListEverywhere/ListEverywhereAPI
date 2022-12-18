@@ -16,7 +16,7 @@ public class ListModel {
 	int list_id;
 	String list_name;
 	LocalDate creation_date;
-	LocalDateTime last_modified;
+	LocalDate last_modified;
 	int user_id;
 	List<ItemModel> list_items;
 	
@@ -33,7 +33,7 @@ public class ListModel {
 	 * @param user_id The user ID of the list owner
 	 * @param list_items Array of shopping list items
 	 */
-	public ListModel(int list_id, String list_name, LocalDate creation_date, LocalDateTime last_modified, int user_id,
+	public ListModel(int list_id, String list_name, LocalDate creation_date, LocalDate last_modified, int user_id,
 			List<ItemModel> list_items) {
 		super();
 		this.list_id = list_id;
@@ -68,11 +68,11 @@ public class ListModel {
 		this.creation_date = creation_date;
 	}
 
-	public LocalDateTime getLastModified() {
+	public LocalDate getLastModified() {
 		return last_modified;
 	}
 
-	public void setLastModified(LocalDateTime last_modified) {
+	public void setLastModified(LocalDate last_modified) {
 		this.last_modified = last_modified;
 	}
 

@@ -17,8 +17,11 @@ public class ListItemMapper implements RowMapper<ListItemModel> {
 
 	@Override
 	public ListItemModel mapRow(ResultSet rs, int rowNum) throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
+		return new ListItemModel(rs.getInt("item_id"),
+				"Unknown",
+				rs.getBoolean("checked"),
+				rs.getInt("list_item_id"),
+				rs.getInt("list_id"));
 	}
 
 }

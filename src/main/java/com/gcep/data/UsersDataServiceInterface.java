@@ -5,8 +5,9 @@ import java.util.List;
 import com.gcep.model.UserModel;
 
 /**
- * Provides the methods for various operations performed with user data.
- * @author gabriel
+ * Provides the outline of methods for various operations performed with user data.
+ * @author Gabriel Cepleanu
+ * @version 0.1
  *
  */
 public interface UsersDataServiceInterface {
