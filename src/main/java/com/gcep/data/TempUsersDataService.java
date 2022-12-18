@@ -8,6 +8,13 @@ import org.springframework.stereotype.Repository;
 
 import com.gcep.model.UserModel;
 
+/**
+ * <b>TO BE REMOVED IN A FUTURE VERSION</b>
+ * Provides various user data options with a hard-coded list of users. No connection to database.
+ * @author Gabriel Cepleanu
+ * @version 0.1
+ *
+ */
 @Repository
 public class TempUsersDataService implements UsersDataServiceInterface {
 	

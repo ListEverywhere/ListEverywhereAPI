@@ -7,6 +7,12 @@ import org.springframework.jdbc.core.RowMapper;
 
 import com.gcep.model.UserModel;
 
+/**
+ * Mapper class for User objects from the database
+ * @author Gabriel Cepleanu
+ * @version 0.1
+ *
+ */
 public class UserMapper implements RowMapper<UserModel> {
 
 	@Override

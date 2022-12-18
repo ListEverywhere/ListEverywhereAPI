@@ -19,6 +19,12 @@ import com.gcep.data.UsersDataServiceInterface;
 import com.gcep.model.StatusModel;
 import com.gcep.model.UserModel;
 
+/**
+ * Provides the REST service endpoints for user data operations
+ * @author Gabriel Cepleanu
+ * @version 0.1
+ *
+ */
 @RestController
 @RequestMapping("/users")
 public class UsersRESTController {
@@ -26,6 +32,11 @@ public class UsersRESTController {
 	@Autowired
 	UsersDataService usersDataService;
 	
+	/**
+	 * POST method for adding a new user. All fields must be valid.
+	 * @param user The user information
+	 * @return JSON response
+	 */
 	@PostMapping("/")
 	public ResponseEntity<?> registerUser(@RequestBody @Valid UserModel user) {
 		int result = usersDataService.addUser(user);
@@ -38,11 +49,20 @@ public class UsersRESTController {
 		}
 	}
 	
+	/**
+	 * GET method for returning a list of all users.
+	 * @return JSON response
+	 */
 	@GetMapping("/")
 	public ResponseEntity<?> getUsers() {
 		return new ResponseEntity<>(usersDataService.getUsers(), HttpStatus.OK);
 	}
 	
+	/**
+	 * PUT method for updating a specified user. User ID must be specified in the request body.
+	 * @param updated The updated user information
+	 * @return JSON response
+	 */
 	@PutMapping("/")
 	public ResponseEntity<?> updateUser(@RequestBody UserModel updated) {
 		UserModel result = usersDataService.updateUser(updated);
@@ -55,6 +75,11 @@ public class UsersRESTController {
 		}
 	}
 	
+	/**
+	 * DELETE method for removing a specified user.
+	 * @param id The ID of the user
+	 * @return JSON response
+	 */
 	@DeleteMapping("/{id}")
 	public ResponseEntity<?> deleteUser(@PathVariable(name="id") int id) {
 		boolean result = usersDataService.deleteUser(id);

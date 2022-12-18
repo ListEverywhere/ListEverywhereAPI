@@ -5,6 +5,12 @@ import java.time.LocalDate;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+/**
+ * This class represents a User object that contains various user information.
+ * @author Gabriel Cepleanu
+ * @version 0.1
+ *
+ */
 public class UserModel {
 
 	private int user_id;
@@ -36,6 +42,16 @@ public class UserModel {
 		
 	}
 	
+	/**
+	 * 
+	 * @param user_id The ID of the user
+	 * @param first_name The First Name of the user
+	 * @param last_name The Last Name of the user
+	 * @param email The Email Address of the user
+	 * @param date_of_birth The user's date of birth
+	 * @param username The user's username
+	 * @param password The user's password
+	 */
 	public UserModel(int user_id, String first_name, String last_name, String email, LocalDate date_of_birth,
 			String username, String password) {
 		super();
@@ -55,16 +71,16 @@ public class UserModel {
 	public void setId(int user_id) {
 		this.user_id = user_id;
 	}
-	public String getFirst_name() {
+	public String getFirstName() {
 		return first_name;
 	}
-	public void setFirst_name(String first_name) {
+	public void setFirstName(String first_name) {
 		this.first_name = first_name;
 	}
-	public String getLast_name() {
+	public String getLastName() {
 		return last_name;
 	}
-	public void setLast_name(String last_name) {
+	public void setLastName(String last_name) {
 		this.last_name = last_name;
 	}
 	public String getEmail() {
@@ -73,10 +89,10 @@ public class UserModel {
 	public void setEmail(String email) {
 		this.email = email;
 	}
-	public LocalDate getDate_of_birth() {
+	public LocalDate getDateOfBirth() {
 		return date_of_birth;
 	}
-	public void setDate_of_birth(LocalDate date_of_birth) {
+	public void setDateOfBirth(LocalDate date_of_birth) {
 		this.date_of_birth = date_of_birth;
 	}
 	public String getUsername() {

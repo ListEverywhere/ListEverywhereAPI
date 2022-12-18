@@ -4,6 +4,13 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * This class represents a Shopping List.
+ * It holds the information for a list, including a list of items.
+ * @author Gabriel Cepleanu
+ * @version 0.1
+ *
+ */
 public class ListModel {
 
 	int list_id;
@@ -17,6 +24,15 @@ public class ListModel {
 		super();
 	}
 
+	/**
+	 * 
+	 * @param list_id The ID of the list
+	 * @param list_name The Name of the list
+	 * @param creation_date The date that the list was created
+	 * @param last_modified The date of the most recent change to the list
+	 * @param user_id The user ID of the list owner
+	 * @param list_items Array of shopping list items
+	 */
 	public ListModel(int list_id, String list_name, LocalDate creation_date, LocalDateTime last_modified, int user_id,
 			List<ItemModel> list_items) {
 		super();
