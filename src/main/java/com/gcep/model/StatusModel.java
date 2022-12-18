@@ -3,9 +3,14 @@ package com.gcep.model;
 public class StatusModel {
 
 	private String status;
-	private String message;
+	private String[] message;
 	
 	public StatusModel(String status, String message) {
+		this.status = status;
+		this.message = new String[] {message};
+	}
+	
+	public StatusModel(String status, String[] message) {
 		this.status = status;
 		this.message = message;
 	}
@@ -18,11 +23,11 @@ public class StatusModel {
 		this.status = status;
 	}
 
-	public String getMessage() {
+	public String[] getMessage() {
 		return message;
 	}
 
-	public void setMessage(String message) {
+	public void setMessage(String[] message) {
 		this.message = message;
 	}
 	

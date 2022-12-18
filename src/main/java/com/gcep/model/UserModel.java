@@ -2,14 +2,34 @@ package com.gcep.model;
 
 import java.time.LocalDate;
 
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
 public class UserModel {
 
 	private int user_id;
+	
+	@NotNull
+	@Size(min=2, max=25, message="First Name must be between 2 to 25 characters.")
 	private String first_name;
+	
+	@NotNull
+	@Size(min=2, max=25, message="Last Name must be between 2 to 25 characters.")
 	private String last_name;
+	
+	@NotNull
+	@Size(min=4, max=40, message="Email Address must be between 4 to 40 characters.")
 	private String email;
+	
+	@NotNull
 	private LocalDate date_of_birth;
+	
+	@NotNull
+	@Size(min=5, max=20, message="Username must be between 5 to 20 characters.")
 	private String username;
+	
+	@NotNull
+	@Size(min=8, max=32, message="Password must be between 8 to 32 characters.")
 	private String password;
 	
 	public UserModel() {

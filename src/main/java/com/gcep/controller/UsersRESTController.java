@@ -1,5 +1,7 @@
 package com.gcep.controller;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +27,7 @@ public class UsersRESTController {
 	UsersDataService usersDataService;
 	
 	@PostMapping("/")
-	public ResponseEntity<?> registerUser(@RequestBody UserModel user) {
+	public ResponseEntity<?> registerUser(@RequestBody @Valid UserModel user) {
 		int result = usersDataService.addUser(user);
 		
 		if (result > 0) {
