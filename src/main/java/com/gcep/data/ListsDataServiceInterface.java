@@ -57,10 +57,16 @@ public interface ListsDataServiceInterface {
 	public ItemModel editListItem(ItemModel updated);
 	/**
 	 * Deletes an item from a shopping list.
-	 * @param id ID number of the item to remove
+	 * @param id List Item ID number of the item to remove
 	 * @return Status of operation. If 1, operation was successful.
 	 */
 	public int deleteListItem(int id);
+	/**
+	 * Deletes a custom list item from a shopping list.
+	 * @param id Custom List Item ID number of the item to remove
+	 * @return Status of operation. If 1, operation was successful.
+	 */
+	public int deleteCustomListItem(int id);
 	/**
 	 * Searches for items containing the search term in the item name.
 	 * @param search_term The item name (contains, case insensitive)

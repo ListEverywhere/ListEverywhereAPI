@@ -23,7 +23,9 @@ import com.gcep.exception.DatabaseErrorException;
 import com.gcep.mapper.CustomListItemMapper;
 import com.gcep.mapper.ListItemMapper;
 import com.gcep.mapper.ListMapper;
+import com.gcep.model.CustomListItemModel;
 import com.gcep.model.ItemModel;
+import com.gcep.model.ListItemModel;
 import com.gcep.model.ListModel;
 
 /**
@@ -183,20 +185,64 @@ public class ListsDataService implements ListsDataServiceInterface {
 
 	@Override
 	public int addListItem(int list_id, ItemModel item) {
-		// TODO Auto-generated method stub
-		return 0;
+		int result = 0;
+		try {
+			// check what type of item is given so that the appropriate table is updated
+			if (item instanceof ListItemModel) {
+				ListItemModel current = (ListItemModel) item;
+				result = jdbcTemplate.update("INSERT INTO lists_items (list_id, item_id, checked) VALUES (?,?,false)", current.getListId(), current.getItemId());
+				
+			} else if (item instanceof CustomListItemModel) {
+				CustomListItemModel current = (CustomListItemModel) item;
+				result = jdbcTemplate.update("INSERT INTO lists_items_custom (list_id, item_name, checked) VALUES (?,?,false)", current.getListId(), current.getItemName());
+			}
+		} catch (Exception e) {
+			// an error with the database has occurred
+			throw new DatabaseErrorException();
+		}
+		return result;
 	}
 
 	@Override
 	public ItemModel editListItem(ItemModel updated) {
-		// TODO Auto-generated method stub
-		return null;
+		ItemModel retval = null;
+		int result = 0;
+		try {
+			// check what type of item is given so that the appropriate table is updated
+			if (updated instanceof ListItemModel) {
+				ListItemModel current = (ListItemModel) updated;
+				result = jdbcTemplate.update("UPDATE lists_items SET item_id=?, checked=? WHERE list_item_id=?",
+						current.getItemId(), current.isChecked(), current.getListItemId());
+				// set retval as updated ItemModel if successful
+				if (result > 0) {
+					retval = current;
+				}
+			} else if (updated instanceof CustomListItemModel) {
+				CustomListItemModel current = (CustomListItemModel) updated;
+				result = jdbcTemplate.update("UPDATE lists_items_custom SET item_name=?, checked=? WHERE custom_item_id=?",
+						current.getItemName(), current.isChecked(), current.getCustomItemId());
+				// set retval as updated ItemModel if successful
+				if (result > 0) {
+					retval = current;
+				}
+			}
+		} catch (Exception e) {
+			// an error with the database has occurred
+			throw new DatabaseErrorException(e.getMessage());
+		}
+		return retval;
 	}
 
 	@Override
 	public int deleteListItem(int id) {
-		// TODO Auto-generated method stub
-		return 0;
+		int result = 0;
+		try {
+			result = jdbcTemplate.update("DELETE FROM lists_items WHERE list_item_id=?", id);
+		} catch (Exception e) {
+			// an error with the database has occurred
+			throw new DatabaseErrorException();
+		}
+		return result;
 	}
 
 	@Override
@@ -209,6 +255,18 @@ public class ListsDataService implements ListsDataServiceInterface {
 	public int GetItemById(int item_id) {
 		// TODO to be implemented in a future version
 		return 0;
+	}
+
+	@Override
+	public int deleteCustomListItem(int id) {
+		int result = 0;
+		try {
+			result = jdbcTemplate.update("DELETE FROM lists_items_custom WHERE custom_item_id=?", id);
+		} catch (Exception e) {
+			// an error with the database has occurred
+			throw new DatabaseErrorException();
+		}
+		return result;
 	}
 
 }
