@@ -19,7 +19,8 @@ public class RecipeMapper implements RowMapper<RecipeModel> {
 				rs.getString("recipe_description"),
 				null,
 				null,
-				false
+				false,
+				rs.getInt("user_id")
 				);
 	}
 

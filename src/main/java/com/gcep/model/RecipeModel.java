@@ -11,13 +11,14 @@ public class RecipeModel {
 	private List<RecipeItemModel> recipe_items;
 	private List<RecipeStepModel> recipe_steps;
 	private boolean published;
+	private int user_id;
 	
 	public RecipeModel() {
 		
 	}
 	
 	public RecipeModel(int recipe_id, int category, String recipe_name, String recipe_description,
-			List<RecipeItemModel> recipe_items, List<RecipeStepModel> recipe_steps, boolean published) {
+			List<RecipeItemModel> recipe_items, List<RecipeStepModel> recipe_steps, boolean published, int user_id) {
 		super();
 		this.recipe_id = recipe_id;
 		this.category = category;
@@ -26,6 +27,7 @@ public class RecipeModel {
 		this.recipe_items = recipe_items;
 		this.recipe_steps = recipe_steps;
 		this.published = published;
+		this.user_id = user_id;
 	}
 
 	public int getRecipeId() {
@@ -83,6 +85,16 @@ public class RecipeModel {
 	public void setPublished(boolean published) {
 		this.published = published;
 	}
+
+	public int getUserId() {
+		return user_id;
+	}
+
+	public void setUserId(int user_id) {
+		this.user_id = user_id;
+	}
+	
+	
 	
 	
 	

@@ -1,12 +1,20 @@
 package com.gcep.data;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
 
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCreator;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import com.gcep.exception.DatabaseErrorException;
@@ -32,7 +40,8 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 		RecipeModel recipe = null;
 		
 		try {
-			recipe = jdbc.queryForObject("SELECT * FROM recipes WHERE recipe_id=?", new RecipeMapper(), new Object[] {id});
+			recipe = jdbc.queryForObject("SELECT recipes.*, users_recipes.* FROM recipes "
+					+ "INNER JOIN users_recipes ON users_recipes.recipe_id=recipes.recipe_id WHERE recipes.recipe_id=?", new RecipeMapper(), new Object[] {id});
 		}
 		catch (EmptyResultDataAccessException e) {
 			// did not find a recipe, return null
@@ -49,9 +58,9 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 		
 		try {
 			recipes = jdbc.query("SELECT recipes.*, users_recipes.user_id, users_recipes.recipe_id FROM recipes "
-					+ "INNER JOIN users_recipes ON recipes.recipe_id=users_recipes.recipe_id WHERE user_id=?", new RecipeMapper(), new Object[] {user_id});
+					+ "INNER JOIN users_recipes ON recipes.recipe_id=users_recipes.recipe_id WHERE users_recipes.user_id=?", new RecipeMapper(), new Object[] {user_id});
 		} catch (Exception e) {
-			throw new DatabaseErrorException(e.getMessage());
+			throw new DatabaseErrorException();
 		}
 		return recipes;
 	}
@@ -61,18 +70,46 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 		List<RecipeModel> recipes = null;
 		
 		try {
-			recipes = jdbc.query("SELECT recipes.*, categories.category_id FROM recipes "
-					+ "INNER JOIN categories ON recipes.category=categories.category_id WHERE category_id=?", new RecipeMapper(), new Object[] {category});
+			recipes = jdbc.query("SELECT recipes.*, categories.category_id, users_recipes.* FROM recipes "
+					+ "INNER JOIN categories ON recipes.category=categories.category_id "
+					+ "INNER JOIN users_recipes ON users_recipes.recipe_id=recipes.recipe_id WHERE category_id=?", new RecipeMapper(), new Object[] {category});
 		} catch (Exception e) {
-			throw new DatabaseErrorException(e.getMessage());
+			throw new DatabaseErrorException();
 		}
 		return recipes;
 	}
 
 	@Override
 	public int addRecipe(RecipeModel recipe) {
-		// TODO Auto-generated method stub
-		return 0;
+		KeyHolder key = new GeneratedKeyHolder();
+		int result = 0;
+		
+		try {
+			jdbc.update(
+					new PreparedStatementCreator() {
+
+						@Override
+						public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
+							PreparedStatement ps = con.prepareStatement("INSERT INTO recipes (category, recipe_name, recipe_description) VALUES (?,?,?)", Statement.RETURN_GENERATED_KEYS);
+							ps.setInt(1, recipe.getCategory());
+							ps.setString(2, recipe.getRecipeName());
+							ps.setString(3, recipe.getRecipeDescription());
+							return ps;
+						}
+						
+					},
+					key);
+			result = jdbc.update("INSERT INTO users_recipes (recipe_id, user_id) VALUES (?,?)",
+					key.getKey(), recipe.getUserId());
+		} catch (DataIntegrityViolationException e) {
+			this.deleteRecipeById(key.getKey().intValue());
+			throw new DatabaseErrorException("User does not exist.");
+		}
+		
+		catch (Exception e) {
+			throw new DatabaseErrorException(e.getMessage());
+		}
+		return result;
 	}
 
 	@Override
@@ -83,8 +120,14 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 
 	@Override
 	public int deleteRecipeById(int recipe_id) {
-		// TODO Auto-generated method stub
-		return 0;
+		int result = 0;
+		
+		try {
+			result = jdbc.update("DELETE FROM recipes WHERE recipe_id=?", recipe_id);
+		} catch (Exception e) {
+			throw new DatabaseErrorException();
+		}
+		return result;
 	}
 
 	@Override
