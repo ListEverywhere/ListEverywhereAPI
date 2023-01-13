@@ -14,7 +14,7 @@ public class RecipeStepMapper implements RowMapper<RecipeStepModel> {
 		// TODO Auto-generated method stub
 		return new RecipeStepModel(
 				rs.getInt("recipe_step_id"),
-				rs.getString("recipe_step_description"),
+				rs.getString("step_description"),
 				rs.getInt("recipe_id")
 				);
 	}

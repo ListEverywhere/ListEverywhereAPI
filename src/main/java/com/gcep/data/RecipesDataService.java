@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.sql.DataSource;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Repository;
 import com.gcep.exception.DatabaseErrorException;
 import com.gcep.mapper.CategoryMapper;
 import com.gcep.mapper.RecipeMapper;
+import com.gcep.mapper.RecipeStepMapper;
 import com.gcep.model.CategoryModel;
 import com.gcep.model.RecipeItemModel;
 import com.gcep.model.RecipeModel;
@@ -37,6 +39,31 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 		this.dataSource = ds;
 		this.jdbc = new JdbcTemplate(ds);
 	}
+	
+	private List<RecipeStepModel> getRecipeSteps(RecipeModel recipe) {
+		List<RecipeStepModel> steps = null;
+		try {
+			steps = jdbc.query("SELECT recipes_steps.*, recipes.recipe_id FROM recipes_steps "
+					+ "INNER JOIN recipes ON recipes.recipe_id=recipes_steps.recipe_id WHERE recipes.recipe_id=?",
+					new RecipeStepMapper(), new Object[] {recipe.getRecipeId()});
+		} catch (Exception e) {
+			throw new DatabaseErrorException(e.getMessage());
+		}
+		
+		return steps;
+	}
+	
+	private List<RecipeModel> addStepsToRecipeList(List<RecipeModel> recipes) {
+		List<RecipeModel> retval = new ArrayList<RecipeModel>();
+		
+		for (int i = 0; i < recipes.size(); i++) {
+			var recipe = recipes.get(i);
+			recipe.setRecipeSteps(getRecipeSteps(recipe));
+			retval.add(recipe);
+		}
+		
+		return retval;
+	}
 
 	@Override
 	public RecipeModel getRecipeById(int id) {
@@ -45,12 +72,13 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 		try {
 			recipe = jdbc.queryForObject("SELECT recipes.*, users_recipes.* FROM recipes "
 					+ "INNER JOIN users_recipes ON users_recipes.recipe_id=recipes.recipe_id WHERE recipes.recipe_id=?", new RecipeMapper(), new Object[] {id});
+			recipe.setRecipeSteps(getRecipeSteps(recipe));
 		}
 		catch (EmptyResultDataAccessException e) {
 			// did not find a recipe, return null
 		}
 		catch (Exception e) {
-			throw new DatabaseErrorException();
+			throw new DatabaseErrorException(e.getMessage());
 		}
 		return recipe;
 	}
@@ -60,8 +88,9 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 		List<RecipeModel> recipes = null;
 		
 		try {
-			recipes = jdbc.query("SELECT recipes.*, users_recipes.user_id, users_recipes.recipe_id FROM recipes "
+			var recipesInit = jdbc.query("SELECT recipes.*, users_recipes.user_id, users_recipes.recipe_id FROM recipes "
 					+ "INNER JOIN users_recipes ON recipes.recipe_id=users_recipes.recipe_id WHERE users_recipes.user_id=?", new RecipeMapper(), new Object[] {user_id});
+			recipes = addStepsToRecipeList(recipesInit);
 		} catch (Exception e) {
 			throw new DatabaseErrorException();
 		}
@@ -73,9 +102,10 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 		List<RecipeModel> recipes = null;
 		
 		try {
-			recipes = jdbc.query("SELECT recipes.*, categories.category_id, users_recipes.* FROM recipes "
+			var recipesInit = jdbc.query("SELECT recipes.*, categories.category_id, users_recipes.* FROM recipes "
 					+ "INNER JOIN categories ON recipes.category=categories.category_id "
 					+ "INNER JOIN users_recipes ON users_recipes.recipe_id=recipes.recipe_id WHERE category_id=?", new RecipeMapper(), new Object[] {category});
+			recipes = addStepsToRecipeList(recipesInit);
 		} catch (Exception e) {
 			throw new DatabaseErrorException();
 		}
