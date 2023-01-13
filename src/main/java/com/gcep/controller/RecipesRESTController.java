@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.gcep.data.RecipesDataServiceInterface;
 import com.gcep.model.CategoryModel;
 import com.gcep.model.RecipeModel;
+import com.gcep.model.RecipeStepModel;
 import com.gcep.model.StatusModel;
 
 @RestController
@@ -88,6 +90,18 @@ public class RecipesRESTController {
 		}
 	}
 	
+	@DeleteMapping("/{id}")
+	public ResponseEntity<?> deleteRecipe(@PathVariable(name="id") int id) {
+		int result = recipesDataService.deleteRecipeById(id);
+		
+		if (result > 0) {
+			return new ResponseEntity<>(new StatusModel("success", "Successfully deleted recipe."), HttpStatus.OK);
+		}
+		else {
+			return new ResponseEntity<>(new StatusModel("error", "Failed to delete recipe."), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+	
 	@PostMapping("/publish/{id}")
 	public ResponseEntity<?> publishRecipe(@PathVariable(name="id") int recipe_id) {
 		boolean result = recipesDataService.recipePublish(recipe_id);
@@ -121,6 +135,42 @@ public class RecipesRESTController {
 		}
 		else {
 			return new ResponseEntity<>(new StatusModel("error", "Category not found."), HttpStatus.NOT_FOUND);
+		}
+	}
+	
+	@PostMapping("/steps/")
+	public ResponseEntity<?> addRecipeStep(@RequestBody RecipeStepModel step) {
+		int result = recipesDataService.addRecipeStep(step);
+		
+		if (result > 0) {
+			return new ResponseEntity<>(new StatusModel("success", "Successfully added step."), HttpStatus.OK);
+		}
+		else {
+			return new ResponseEntity<>(new StatusModel("error", "Failed to create step."), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+	
+	@PutMapping("/steps/")
+	public ResponseEntity<?> updateRecipeStep(@RequestBody RecipeStepModel updated) {
+		RecipeStepModel result = recipesDataService.updateRecipeStep(updated);
+		
+		if (result != null) {
+			return new ResponseEntity<>(new StatusModel("success", "Successfully updated step."), HttpStatus.OK);
+		}
+		else {
+			return new ResponseEntity<>(new StatusModel("error", "Failed to update step."), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+	
+	@DeleteMapping("/steps/{id}") 
+	public ResponseEntity<?> deleteRecipeStep(@PathVariable(name="id") int id) {
+		int result = recipesDataService.deleteRecipeStep(id);
+		
+		if (result > 0) {
+			return new ResponseEntity<>(new StatusModel("success", "Successfully deleted step."), HttpStatus.OK);
+		}
+		else {
+			return new ResponseEntity<>(new StatusModel("error", "Failed to delete step."), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 	

@@ -161,20 +161,43 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 
 	@Override
 	public int addRecipeStep(RecipeStepModel step) {
-		// TODO Auto-generated method stub
-		return 0;
+		int result = 0;
+		
+		try {
+			result = jdbc.update("INSERT INTO recipes_steps (step_description, recipe_id) VALUES (?,?)",
+					step.getStepDescription(), step.getRecipeId());
+		} catch (Exception e) {
+			throw new DatabaseErrorException(e.getMessage());
+		}
+		return result;
 	}
 
 	@Override
 	public RecipeStepModel updateRecipeStep(RecipeStepModel updated) {
-		// TODO Auto-generated method stub
-		return null;
+		RecipeStepModel result = null;
+		try {
+			int success = jdbc.update("UPDATE recipes_steps SET step_description=? WHERE recipe_step_id=?",
+					updated.getStepDescription(), updated.getRecipeStepId());
+			if (success > 0) {
+				result = updated;
+			}
+		} catch (Exception e) {
+			throw new DatabaseErrorException(e.getMessage());
+		}
+		return result;
 	}
 
 	@Override
 	public int deleteRecipeStep(int recipe_step_id) {
-		// TODO Auto-generated method stub
-		return 0;
+		int result = 0;
+		
+		try {
+			result = jdbc.update("DELETE FROM recipes_steps WHERE recipe_step_id=?", recipe_step_id);
+		} catch (Exception e) {
+			throw new DatabaseErrorException(e.getMessage());
+		}
+		
+		return result;
 	}
 
 	@Override
