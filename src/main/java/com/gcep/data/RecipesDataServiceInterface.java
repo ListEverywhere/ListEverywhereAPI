@@ -2,6 +2,7 @@ package com.gcep.data;
 import java.util.List;
 
 import com.gcep.model.CategoryModel;
+import com.gcep.model.RecipeItemModel;
 import com.gcep.model.RecipeModel;
 import com.gcep.model.RecipeStepModel;
 
@@ -19,5 +20,8 @@ public interface RecipesDataServiceInterface {
 	public int deleteRecipeStep(int recipe_step_id);
 	public List<CategoryModel> getCategories();
 	public CategoryModel getCategoryById(int category);
+	public int addRecipeItem(RecipeItemModel item);
+	public RecipeItemModel updateRecipeItem(RecipeItemModel updated);
+	public int deleteRecipeItem(int id);
 
 }

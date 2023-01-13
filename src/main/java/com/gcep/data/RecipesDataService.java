@@ -10,6 +10,7 @@ import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
@@ -18,8 +19,10 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import com.gcep.exception.DatabaseErrorException;
+import com.gcep.mapper.CategoryMapper;
 import com.gcep.mapper.RecipeMapper;
 import com.gcep.model.CategoryModel;
+import com.gcep.model.RecipeItemModel;
 import com.gcep.model.RecipeModel;
 import com.gcep.model.RecipeStepModel;
 
@@ -107,15 +110,25 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 		}
 		
 		catch (Exception e) {
-			throw new DatabaseErrorException(e.getMessage());
+			throw new DatabaseErrorException();
 		}
 		return result;
 	}
 
 	@Override
 	public RecipeModel updateRecipe(RecipeModel updated) {
-		// TODO Auto-generated method stub
-		return null;
+		RecipeModel recipe = null;
+		try {
+			int result = jdbc.update("UPDATE recipes SET category=?, recipe_name=?, recipe_description=? WHERE recipe_id=?",
+					updated.getCategory(), updated.getRecipeName(), updated.getRecipeDescription(), updated.getRecipeId());
+			
+			if (result > 0) {
+				recipe = updated;
+			}
+		} catch (Exception e) {
+			throw new DatabaseErrorException(e.getMessage());
+		}
+		return recipe;
 	}
 
 	@Override
@@ -132,8 +145,18 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 
 	@Override
 	public boolean recipePublish(int recipe_id) {
-		// TODO Auto-generated method stub
-		return false;
+		int result = 0;
+		
+		try {
+			result = jdbc.update("INSERT INTO recipes_published (recipe_id) VALUES (?)", recipe_id);
+		} 
+		catch (DuplicateKeyException e) {
+			throw new DatabaseErrorException("This recipe has already been submitted for publishing or is already published.");
+		}
+		catch (Exception e) {
+			throw new DatabaseErrorException(e.getClass().getName());
+		}
+		return result > 0;
 	}
 
 	@Override
@@ -156,14 +179,42 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 
 	@Override
 	public List<CategoryModel> getCategories() {
+		List<CategoryModel> categories = null;
+		try {
+			categories = jdbc.query("SELECT * FROM categories", new CategoryMapper());
+		} catch (Exception e) {
+			throw new DatabaseErrorException(e.getMessage());
+		}
+		return categories;
+	}
+
+	@Override
+	public CategoryModel getCategoryById(int category) {
+		CategoryModel retval = null;
+		try {
+			retval = jdbc.queryForObject("SELECT * FROM categories WHERE category_id=?", new CategoryMapper(), new Object[] {category});
+		} catch (Exception e) {
+			throw new DatabaseErrorException(e.getMessage());
+		}
+		return retval;
+	}
+
+	@Override
+	public int addRecipeItem(RecipeItemModel item) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public RecipeItemModel updateRecipeItem(RecipeItemModel updated) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public CategoryModel getCategoryById(int category) {
+	public int deleteRecipeItem(int id) {
 		// TODO Auto-generated method stub
-		return null;
+		return 0;
 	}
 
 }
