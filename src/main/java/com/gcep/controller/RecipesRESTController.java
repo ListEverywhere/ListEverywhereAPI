@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.gcep.data.RecipesDataServiceInterface;
 import com.gcep.model.CategoryModel;
+import com.gcep.model.RecipeItemModel;
 import com.gcep.model.RecipeModel;
 import com.gcep.model.RecipeStepModel;
 import com.gcep.model.StatusModel;
@@ -171,6 +172,42 @@ public class RecipesRESTController {
 		}
 		else {
 			return new ResponseEntity<>(new StatusModel("error", "Failed to delete step."), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+	
+	@PostMapping("/items/")
+	public ResponseEntity<?> addRecipeItem(@RequestBody RecipeItemModel item) {
+		int result = recipesDataService.addRecipeItem(item);
+		
+		if (result > 0) {
+			return new ResponseEntity<>(new StatusModel("success", "Recipe item was successfully added"), HttpStatus.OK);
+		}
+		else {
+			return new ResponseEntity<>(new StatusModel("error", "Failed to add recipe item."), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+	
+	@PutMapping("/items/")
+	public ResponseEntity<?> updateRecipeItem(@RequestBody RecipeItemModel updated) {
+		RecipeItemModel result = recipesDataService.updateRecipeItem(updated);
+		
+		if (result != null) {
+			return new ResponseEntity<>(new StatusModel("success", "Recipe item was successfully updated"), HttpStatus.OK);
+		}
+		else {
+			return new ResponseEntity<>(new StatusModel("error", "Failed to updated recipe item."), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+	
+	@DeleteMapping("/items/{id}")
+	public ResponseEntity<?> deleteRecipeItem(@PathVariable(name="id") int id) {
+		int result = recipesDataService.deleteRecipeItem(id);
+		
+		if (result > 0) {
+			return new ResponseEntity<>(new StatusModel("success", "Recipe item was successfully deleted"), HttpStatus.OK);
+		}
+		else {
+			return new ResponseEntity<>(new StatusModel("error", "Failed to delete recipe item."), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 	

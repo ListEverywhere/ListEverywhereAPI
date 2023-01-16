@@ -21,6 +21,7 @@ import org.springframework.stereotype.Repository;
 
 import com.gcep.exception.DatabaseErrorException;
 import com.gcep.mapper.CategoryMapper;
+import com.gcep.mapper.RecipeItemMapper;
 import com.gcep.mapper.RecipeMapper;
 import com.gcep.mapper.RecipeStepMapper;
 import com.gcep.model.CategoryModel;
@@ -53,12 +54,25 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 		return steps;
 	}
 	
-	private List<RecipeModel> addStepsToRecipeList(List<RecipeModel> recipes) {
+	private List<RecipeItemModel> getRecipeItems(RecipeModel recipe) {
+		List<RecipeItemModel> items = null;
+		try {
+			items = jdbc.query("SELECT recipes_items.*, recipes.recipe_id FROM recipes_items "
+					+ "INNER JOIN recipes ON recipes_items.recipe_id=recipes.recipe_id WHERE recipes_items.recipe_id=?",
+					new RecipeItemMapper(), new Object[] { recipe.getRecipeId()});
+		} catch (Exception e) {
+			throw new DatabaseErrorException(e.getMessage());
+		}
+		return items;
+	}
+	
+	private List<RecipeModel> addStepsItemsToRecipeList(List<RecipeModel> recipes) {
 		List<RecipeModel> retval = new ArrayList<RecipeModel>();
 		
 		for (int i = 0; i < recipes.size(); i++) {
 			var recipe = recipes.get(i);
 			recipe.setRecipeSteps(getRecipeSteps(recipe));
+			recipe.setRecipeItems(getRecipeItems(recipe));
 			retval.add(recipe);
 		}
 		
@@ -73,6 +87,7 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 			recipe = jdbc.queryForObject("SELECT recipes.*, users_recipes.* FROM recipes "
 					+ "INNER JOIN users_recipes ON users_recipes.recipe_id=recipes.recipe_id WHERE recipes.recipe_id=?", new RecipeMapper(), new Object[] {id});
 			recipe.setRecipeSteps(getRecipeSteps(recipe));
+			recipe.setRecipeItems(getRecipeItems(recipe));
 		}
 		catch (EmptyResultDataAccessException e) {
 			// did not find a recipe, return null
@@ -90,7 +105,7 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 		try {
 			var recipesInit = jdbc.query("SELECT recipes.*, users_recipes.user_id, users_recipes.recipe_id FROM recipes "
 					+ "INNER JOIN users_recipes ON recipes.recipe_id=users_recipes.recipe_id WHERE users_recipes.user_id=?", new RecipeMapper(), new Object[] {user_id});
-			recipes = addStepsToRecipeList(recipesInit);
+			recipes = addStepsItemsToRecipeList(recipesInit);
 		} catch (Exception e) {
 			throw new DatabaseErrorException();
 		}
@@ -105,7 +120,7 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 			var recipesInit = jdbc.query("SELECT recipes.*, categories.category_id, users_recipes.* FROM recipes "
 					+ "INNER JOIN categories ON recipes.category=categories.category_id "
 					+ "INNER JOIN users_recipes ON users_recipes.recipe_id=recipes.recipe_id WHERE category_id=?", new RecipeMapper(), new Object[] {category});
-			recipes = addStepsToRecipeList(recipesInit);
+			recipes = addStepsItemsToRecipeList(recipesInit);
 		} catch (Exception e) {
 			throw new DatabaseErrorException();
 		}
@@ -254,20 +269,43 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 
 	@Override
 	public int addRecipeItem(RecipeItemModel item) {
-		// TODO Auto-generated method stub
-		return 0;
+		int result = 0;
+		try {
+			result = jdbc.update("INSERT INTO recipes_items (recipe_id, item_id) VALUES (?,?)",
+					item.getRecipeId(),
+					item.getItemId());
+		} catch (Exception e) {
+			throw new DatabaseErrorException(e.getMessage());
+		}
+		return result;
 	}
 
 	@Override
 	public RecipeItemModel updateRecipeItem(RecipeItemModel updated) {
-		// TODO Auto-generated method stub
-		return null;
+		RecipeItemModel retval = null;
+		try {
+			int result = jdbc.update("UPDATE recipes_items SET item_id=? WHERE recipe_item_id=?",
+					updated.getItemId(),
+					updated.getRecipeItemId());
+			if (result > 0) {
+				retval = updated;
+			}
+		} catch (Exception e) {
+			throw new DatabaseErrorException(e.getMessage());
+		}
+		return retval;
 	}
 
 	@Override
 	public int deleteRecipeItem(int id) {
-		// TODO Auto-generated method stub
-		return 0;
+		int result = 0;
+		try {
+			result = jdbc.update("DELETE FROM recipes_items WHERE recipe_item_id=?",
+					id);
+		} catch (Exception e) {
+			throw new DatabaseErrorException(e.getMessage());
+		}
+		return result;
 	}
 
 }
