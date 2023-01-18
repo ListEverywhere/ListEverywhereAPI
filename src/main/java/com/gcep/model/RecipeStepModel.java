@@ -1,5 +1,11 @@
 package com.gcep.model;
 
+/**
+ * Represents a step object for recipes.
+ * @author Gabriel Cepleanu
+ * @version 0.1
+ *
+ */
 public class RecipeStepModel {
 	
 	private int recipe_step_id;
@@ -10,6 +16,12 @@ public class RecipeStepModel {
 		
 	}
 	
+	/**
+	 * 
+	 * @param recipe_step_id The ID number of the recipe step entry
+	 * @param step_description The description of the step
+	 * @param recipe_id The ID number of the recipe that the step is from
+	 */
 	public RecipeStepModel(int recipe_step_id, String step_description, int recipe_id) {
 		super();
 		this.recipe_step_id = recipe_step_id;

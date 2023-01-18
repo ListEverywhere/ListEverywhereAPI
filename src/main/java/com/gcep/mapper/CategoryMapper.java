@@ -7,6 +7,12 @@ import org.springframework.jdbc.core.RowMapper;
 
 import com.gcep.model.CategoryModel;
 
+/**
+ * Mapper class for category objects from the database.
+ * @author Gabriel Cepleanu
+ * @version 0.1
+ *
+ */
 public class CategoryMapper implements RowMapper<CategoryModel> {
 
 	@Override

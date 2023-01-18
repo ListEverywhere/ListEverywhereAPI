@@ -7,6 +7,12 @@ import org.springframework.jdbc.core.RowMapper;
 
 import com.gcep.model.RecipeStepModel;
 
+/**
+ * Mapper class for recipe step objects from the database.
+ * @author Gabriel Cepleanu
+ * @version 0.1
+ *
+ */
 public class RecipeStepMapper implements RowMapper<RecipeStepModel> {
 
 	@Override

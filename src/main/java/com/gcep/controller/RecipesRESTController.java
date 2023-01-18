@@ -22,6 +22,12 @@ import com.gcep.model.RecipeModel;
 import com.gcep.model.RecipeStepModel;
 import com.gcep.model.StatusModel;
 
+/**
+ * Provides the REST service endpoints for recipe data operations
+ * @author Gabriel Cepleanu
+ * @version 0.1
+ *
+ */
 @RestController
 @CrossOrigin
 @RequestMapping("/recipes")
@@ -30,6 +36,11 @@ public class RecipesRESTController {
 	@Autowired
 	RecipesDataServiceInterface recipesDataService;
 	
+	/**
+	 * Returns a recipe with the given recipe ID
+	 * @param id The ID number of the recipe
+	 * @return JSON response
+	 */
 	@GetMapping("/{id}")
 	public ResponseEntity<?> getRecipeById(@PathVariable(name="id") int id) {
 		RecipeModel recipe = recipesDataService.getRecipeById(id);
@@ -43,6 +54,11 @@ public class RecipesRESTController {
 		
 	}
 	
+	/**
+	 * Returns a list of recipes with the given category ID
+	 * @param id The ID numbe of the category
+	 * @return JSON response
+	 */
 	@GetMapping("/categories/{id}")
 	public ResponseEntity<?> getRecipesByCategory(@PathVariable(name="id") int id) {
 		List<RecipeModel> recipes = recipesDataService.getRecipesByCategory(id);
@@ -55,6 +71,11 @@ public class RecipesRESTController {
 		}
 	}
 	
+	/**
+	 * Returns a list of recipes with the given user ID
+	 * @param id The ID number of the user
+	 * @return JSON response
+	 */
 	@GetMapping("/user/{id}")
 	public ResponseEntity<?> getRecipesByUserId(@PathVariable(name="id") int id) {
 		List<RecipeModel> recipes = recipesDataService.getRecipesByUser(id);
@@ -67,6 +88,11 @@ public class RecipesRESTController {
 		}
 	}
 	
+	/**
+	 * Adds a new recipe to the system.
+	 * @param recipe The recipe information
+	 * @return JSON response
+	 */
 	@PostMapping("/")
 	public ResponseEntity<?> createRecipe(@RequestBody RecipeModel recipe) {
 		int result = recipesDataService.addRecipe(recipe);
@@ -79,6 +105,11 @@ public class RecipesRESTController {
 		}
 	}
 	
+	/**
+	 * Updates an existing recipe in the system.
+	 * @param updated The updated recipe information
+	 * @return JSON response
+	 */
 	@PutMapping("/")
 	public ResponseEntity<?> updateRecipe(@RequestBody RecipeModel updated) {
 		RecipeModel result = recipesDataService.updateRecipe(updated);
@@ -91,6 +122,11 @@ public class RecipesRESTController {
 		}
 	}
 	
+	/**
+	 * Removes an existing recipe from the system
+	 * @param id The ID number of the recipe
+	 * @return JSON response
+	 */
 	@DeleteMapping("/{id}")
 	public ResponseEntity<?> deleteRecipe(@PathVariable(name="id") int id) {
 		int result = recipesDataService.deleteRecipeById(id);
@@ -103,6 +139,11 @@ public class RecipesRESTController {
 		}
 	}
 	
+	/**
+	 * Marks a recipe for publishing. Recipes will need to be approved by a service administrator.
+	 * @param recipe_id The ID number of the recipe.
+	 * @return JSON response
+	 */
 	@PostMapping("/publish/{id}")
 	public ResponseEntity<?> publishRecipe(@PathVariable(name="id") int recipe_id) {
 		boolean result = recipesDataService.recipePublish(recipe_id);
@@ -115,6 +156,10 @@ public class RecipesRESTController {
 		}
 	}
 	
+	/**
+	 * Returns a list of categories
+	 * @return JSON response
+	 */
 	@GetMapping("/categories/")
 	public ResponseEntity<?> getCategories() {
 		List<CategoryModel> categories = recipesDataService.getCategories();
@@ -127,6 +172,11 @@ public class RecipesRESTController {
 		}
 	}
 	
+	/**
+	 * Returns category information by the given ID
+	 * @param id The ID number of the category
+	 * @return JSON response
+	 */
 	@GetMapping("/categories/category/{id}")
 	public ResponseEntity<?> getCategoryById(@PathVariable(name="id") int id) {
 		CategoryModel category = recipesDataService.getCategoryById(id);
@@ -139,6 +189,11 @@ public class RecipesRESTController {
 		}
 	}
 	
+	/**
+	 * Adds a new recipe step
+	 * @param step The recipe step information
+	 * @return JSON response
+	 */
 	@PostMapping("/steps/")
 	public ResponseEntity<?> addRecipeStep(@RequestBody RecipeStepModel step) {
 		int result = recipesDataService.addRecipeStep(step);
@@ -151,6 +206,11 @@ public class RecipesRESTController {
 		}
 	}
 	
+	/**
+	 * Updates an existing recipe step
+	 * @param updated The updated recipe step information
+	 * @return JSON response
+	 */
 	@PutMapping("/steps/")
 	public ResponseEntity<?> updateRecipeStep(@RequestBody RecipeStepModel updated) {
 		RecipeStepModel result = recipesDataService.updateRecipeStep(updated);
@@ -163,6 +223,11 @@ public class RecipesRESTController {
 		}
 	}
 	
+	/**
+	 * Removes an existing recipe step
+	 * @param id ID number of the recipe step entry
+	 * @return JSON response
+	 */
 	@DeleteMapping("/steps/{id}") 
 	public ResponseEntity<?> deleteRecipeStep(@PathVariable(name="id") int id) {
 		int result = recipesDataService.deleteRecipeStep(id);
@@ -175,6 +240,11 @@ public class RecipesRESTController {
 		}
 	}
 	
+	/**
+	 * Adds a new recipe item
+	 * @param item The recipe item information
+	 * @return JSON response
+	 */
 	@PostMapping("/items/")
 	public ResponseEntity<?> addRecipeItem(@RequestBody RecipeItemModel item) {
 		int result = recipesDataService.addRecipeItem(item);
@@ -187,6 +257,11 @@ public class RecipesRESTController {
 		}
 	}
 	
+	/**
+	 * Updates an existing recipe item
+	 * @param updated The updated recipe item information
+	 * @return JSON response
+	 */
 	@PutMapping("/items/")
 	public ResponseEntity<?> updateRecipeItem(@RequestBody RecipeItemModel updated) {
 		RecipeItemModel result = recipesDataService.updateRecipeItem(updated);
@@ -199,6 +274,11 @@ public class RecipesRESTController {
 		}
 	}
 	
+	/**
+	 * Removes an existing recipe item
+	 * @param id The ID number of the recipe item entry
+	 * @return JSON response
+	 */
 	@DeleteMapping("/items/{id}")
 	public ResponseEntity<?> deleteRecipeItem(@PathVariable(name="id") int id) {
 		int result = recipesDataService.deleteRecipeItem(id);

@@ -2,6 +2,12 @@ package com.gcep.model;
 
 import java.util.List;
 
+/**
+ * This class represents a Recipe object that contains Recipe information.
+ * @author Gabriel Cepleanu
+ * @version 0.1
+ *
+ */
 public class RecipeModel {
 	
 	private int recipe_id;
@@ -17,6 +23,17 @@ public class RecipeModel {
 		
 	}
 	
+	/**
+	 * 
+	 * @param recipe_id The ID number of the recipe
+	 * @param category The ID number of the category
+	 * @param recipe_name The name of the recipe
+	 * @param recipe_description The description of the recipe
+	 * @param recipe_items List of Recipe Item objects
+	 * @param recipe_steps List of Recipe Step objects
+	 * @param published If the recipe is published
+	 * @param user_id The ID number of the user that owns the recipe
+	 */
 	public RecipeModel(int recipe_id, int category, String recipe_name, String recipe_description,
 			List<RecipeItemModel> recipe_items, List<RecipeStepModel> recipe_steps, boolean published, int user_id) {
 		super();

@@ -29,6 +29,12 @@ import com.gcep.model.RecipeItemModel;
 import com.gcep.model.RecipeModel;
 import com.gcep.model.RecipeStepModel;
 
+/**
+ * Provides the necessary operations for recipe information.
+ * @author Gabriel Cepleanu
+ * @version 0.1
+ *
+ */
 @Repository
 public class RecipesDataService implements RecipesDataServiceInterface {
 	
@@ -41,6 +47,11 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 		this.jdbc = new JdbcTemplate(ds);
 	}
 	
+	/**
+	 * Returns a list of Recipe Steps from the given Recipe object
+	 * @param recipe The recipe object
+	 * @return List of Recipe Step objects
+	 */
 	private List<RecipeStepModel> getRecipeSteps(RecipeModel recipe) {
 		List<RecipeStepModel> steps = null;
 		try {
@@ -54,6 +65,11 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 		return steps;
 	}
 	
+	/**
+	 * Returns a list of Recipe Items from the given Recipe object
+	 * @param recipe The recipe object
+	 * @return List of Recipe Item objects
+	 */
 	private List<RecipeItemModel> getRecipeItems(RecipeModel recipe) {
 		List<RecipeItemModel> items = null;
 		try {
@@ -66,6 +82,11 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 		return items;
 	}
 	
+	/**
+	 * Takes a list of Recipe Model objects and sets the Recipe Steps and Recipe Items list properties for each Recipe object.
+	 * @param recipes The list of Recipe objects
+	 * @return Updated list of Recipe Objects
+	 */
 	private List<RecipeModel> addStepsItemsToRecipeList(List<RecipeModel> recipes) {
 		List<RecipeModel> retval = new ArrayList<RecipeModel>();
 		

@@ -1,5 +1,11 @@
 package com.gcep.model;
 
+/**
+ * Represents an item object for recipes.
+ * @author Gabriel Cepleanu
+ * @version 0.1
+ *
+ */
 public class RecipeItemModel extends ItemModel {
 	
 	private int recipe_item_id;
@@ -9,6 +15,14 @@ public class RecipeItemModel extends ItemModel {
 		super();
 	}
 	
+	/**
+	 * 
+	 * @param item_id The ID number of the item
+	 * @param item_name The name of the item
+	 * @param checked If the item is checked (not used in a recipe)
+	 * @param recipe_item_id The ID number of the recipe item entry
+	 * @param recipe_id The ID number of the recipe that the item is from
+	 */
 	public RecipeItemModel(int item_id, String item_name, boolean checked, int recipe_item_id, int recipe_id) {
 		super(item_id, item_name, checked);
 		this.recipe_item_id = recipe_item_id;

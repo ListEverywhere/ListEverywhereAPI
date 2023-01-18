@@ -7,6 +7,12 @@ import org.springframework.jdbc.core.RowMapper;
 
 import com.gcep.model.RecipeItemModel;
 
+/**
+ * Mapper class for recipe item objects from the database.
+ * @author Gabriel Cepleanu
+ * @version 0.1
+ *
+ */
 public class RecipeItemMapper implements RowMapper<RecipeItemModel> {
 
 	@Override
