@@ -7,6 +7,7 @@ import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Repository;
 
 import com.gcep.exception.DatabaseErrorException;
@@ -23,6 +24,8 @@ import com.gcep.model.UserModel;
 public class UsersDataService implements UsersDataServiceInterface {
 	
 	@Autowired
+	private PasswordEncoder passwordEncode;
+	@Autowired
 	private DataSource dataSource;
 	private JdbcTemplate jdbcTemplate;
 	
@@ -32,7 +35,7 @@ public class UsersDataService implements UsersDataServiceInterface {
 	 */
 	public UsersDataService(DataSource dataSource) {
 		this.dataSource = dataSource;
-		this.jdbcTemplate = new JdbcTemplate(dataSource);
+		this.jdbcTemplate = new JdbcTemplate(this.dataSource);
 	}
 
 	@Override
@@ -66,6 +69,9 @@ public class UsersDataService implements UsersDataServiceInterface {
 	@Override
 	public int addUser(UserModel user) {
 		int result = 0;
+		
+		user.setPassword(passwordEncode.encode(user.getPassword()));
+		
 		// run query to insert a new user with the given information
 		try {
 			result = jdbcTemplate.update("INSERT INTO users (first_name, last_name, email, date_of_birth, username, password) VALUES (?,?,?,?,?,?)",
@@ -98,6 +104,9 @@ public class UsersDataService implements UsersDataServiceInterface {
 	@Override
 	public UserModel updateUser(UserModel updated) {
 		int result = 0;
+		
+		updated.setPassword(passwordEncode.encode(updated.getPassword()));
+		
 		// run query to update a user with the given information
 		try {
 			result = jdbcTemplate.update("UPDATE users SET first_name=?, last_name=?, email=?, date_of_birth=?, username=?, password=? WHERE user_id=?",
@@ -126,8 +135,14 @@ public class UsersDataService implements UsersDataServiceInterface {
 
 	@Override
 	public UserModel getUserByUsername(String username) {
-		// TODO to be implemented in a future version
-		return null;
+		UserModel result = null;
+		
+		try {
+			result = jdbcTemplate.queryForObject("SELECT * FROM users WHERE username=?", new UserMapper(), new Object[] {username});
+		} catch (Exception e) {
+			throw new DatabaseErrorException(e.getMessage());
+		}
+		return result;
 	}
 
 }
