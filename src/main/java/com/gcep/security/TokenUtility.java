@@ -5,6 +5,7 @@ import java.util.Date;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
@@ -19,6 +20,8 @@ public class TokenUtility {
 	
 	public String generateToken(User user) {
 		
+		
+		
 		// update this function to not use deprecated function
 		return Jwts.builder().setSubject(String.format("%s,%s", user.getUsername(), user.getPassword()))
 				.setIssuer("gcep")
@@ -26,6 +29,22 @@ public class TokenUtility {
 				.setExpiration(new Date(System.currentTimeMillis() + EXPIRES))
 				.signWith(SignatureAlgorithm.HS256, secret)
 				.compact();
+	}
+	
+	public boolean validateToken(String tkn) {
+		try {
+			Jwts.parser().setSigningKey(secret).parseClaimsJws(tkn);
+			return true;
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+		
+		return false;
+	}
+	
+	public String getSubject(String tkn) {
+		Claims c = Jwts.parser().setSigningKey(secret).parseClaimsJws(tkn).getBody();
+		return c.getSubject();
 	}
 
 }

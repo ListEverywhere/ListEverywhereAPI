@@ -10,6 +10,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.gcep.service.UsersService;
 
@@ -18,19 +19,20 @@ public class AppSecurityConfig {
 	
 	@Autowired
 	private UsersService usersService;
+	@Autowired
+	private TokenFilter tokenFilter;
 	
 	
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		
 		http.csrf().disable()
-		.httpBasic().and().authorizeRequests()
-		.antMatchers("/user/**").authenticated()
-		.and()
 		.authorizeRequests()
 		.antMatchers("/users/login/").permitAll()
 		.anyRequest().authenticated()
 		;
+		
+		http.addFilterBefore(tokenFilter, UsernamePasswordAuthenticationFilter.class);
 		
 		return http.build();
 	}
