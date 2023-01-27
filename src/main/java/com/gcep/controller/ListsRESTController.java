@@ -21,6 +21,7 @@ import com.gcep.model.ItemModel;
 import com.gcep.model.ListItemModel;
 import com.gcep.model.ListModel;
 import com.gcep.model.StatusModel;
+import com.gcep.service.ItemsService;
 
 /**
  * Provides the REST service endpoints for shopping list data operations
@@ -35,6 +36,14 @@ public class ListsRESTController {
 	
 	@Autowired
 	ListsDataServiceInterface listsDataService;
+	@Autowired
+	ItemsService itemsService;
+	
+	@GetMapping("/test")
+	public ResponseEntity<?> test() {
+		itemsService.test();
+		return new ResponseEntity<>(HttpStatus.OK);
+	}
 	
 	/**
 	 * GET method for getting a list with the given list ID
