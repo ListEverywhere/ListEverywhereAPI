@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.gcep.data.ListsDataServiceInterface;
 import com.gcep.model.CustomListItemModel;
+import com.gcep.model.FoodItemModel;
 import com.gcep.model.ItemModel;
 import com.gcep.model.ListItemModel;
 import com.gcep.model.ListModel;
@@ -39,10 +40,16 @@ public class ListsRESTController {
 	@Autowired
 	ItemsService itemsService;
 	
-	@GetMapping("/test")
-	public ResponseEntity<?> test() {
-		itemsService.test();
-		return new ResponseEntity<>(HttpStatus.OK);
+	@GetMapping("/test/{search_term}")
+	public ResponseEntity<?> test(@PathVariable(name="search_term") String search_term) {
+		List<FoodItemModel> items = null;
+		try {
+			items = itemsService.searchItems(search_term);
+			return new ResponseEntity<>(items,HttpStatus.OK);
+		} catch (Exception e) {
+			return new ResponseEntity<>(e, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		
 	}
 	
 	/**

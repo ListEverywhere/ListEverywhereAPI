@@ -1,5 +1,8 @@
 package com.gcep.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown=true)
 public class FoodItemModel {
 	
 	private int food_id;
