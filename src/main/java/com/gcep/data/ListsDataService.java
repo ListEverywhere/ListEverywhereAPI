@@ -24,9 +24,11 @@ import com.gcep.mapper.CustomListItemMapper;
 import com.gcep.mapper.ListItemMapper;
 import com.gcep.mapper.ListMapper;
 import com.gcep.model.CustomListItemModel;
+import com.gcep.model.FoodItemModel;
 import com.gcep.model.ItemModel;
 import com.gcep.model.ListItemModel;
 import com.gcep.model.ListModel;
+import com.gcep.service.ItemsService;
 
 /**
  * Provides the necessary operations for shopping list information.
@@ -40,6 +42,9 @@ public class ListsDataService implements ListsDataServiceInterface {
 	@Autowired
 	private DataSource dataSource;
 	private JdbcTemplate jdbcTemplate;
+	
+	@Autowired
+	private ItemsService itemsService;
 	
 	public ListsDataService(DataSource dataSource) {
 		this.dataSource = dataSource;
@@ -59,9 +64,13 @@ public class ListsDataService implements ListsDataServiceInterface {
 			var items = jdbcTemplate.query("SELECT lists.list_id, lists_items.* FROM lists_items "
 					+ "INNER JOIN lists ON lists_items.list_id=lists.list_id WHERE lists.list_id=?",
 					new ListItemMapper(), new Object[] { list.getListId()});
+			for (int i = 0; i < items.size(); i++) {
+				FoodItemModel item = itemsService.getItem(items.get(i).getItemId());
+				items.get(i).setItemName(item.getFood_name());
+			}
 			itemList.addAll(items);
 		} catch (Exception e) {
-			throw new DatabaseErrorException();
+			throw new DatabaseErrorException(e.getMessage());
 		}
 		
 		// get CustomListItems
@@ -71,7 +80,7 @@ public class ListsDataService implements ListsDataServiceInterface {
 					new CustomListItemMapper(), new Object[] { list.getListId()});
 			itemList.addAll(items);
 		} catch (Exception e) {
-			throw new DatabaseErrorException();
+			throw new DatabaseErrorException(e.getMessage());
 		}
 		
 		// return the final item list
@@ -90,7 +99,7 @@ public class ListsDataService implements ListsDataServiceInterface {
 			list.setListItems(getListItems(list));
 		} catch (Exception e) {
 			// an error with the database has occurred
-			throw new DatabaseErrorException();
+			throw new DatabaseErrorException(e.getMessage());
 		}
 		return list;
 	}

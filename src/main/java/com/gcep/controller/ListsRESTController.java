@@ -17,10 +17,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.gcep.data.ListsDataServiceInterface;
 import com.gcep.model.CustomListItemModel;
+import com.gcep.model.FoodItemModel;
 import com.gcep.model.ItemModel;
 import com.gcep.model.ListItemModel;
 import com.gcep.model.ListModel;
 import com.gcep.model.StatusModel;
+import com.gcep.service.ItemsService;
 
 /**
  * Provides the REST service endpoints for shopping list data operations
@@ -35,6 +37,20 @@ public class ListsRESTController {
 	
 	@Autowired
 	ListsDataServiceInterface listsDataService;
+	@Autowired
+	ItemsService itemsService;
+	
+	@GetMapping("/test/{search_term}")
+	public ResponseEntity<?> test(@PathVariable(name="search_term") String search_term) {
+		List<FoodItemModel> items = null;
+		try {
+			items = itemsService.searchItems(search_term);
+			return new ResponseEntity<>(items,HttpStatus.OK);
+		} catch (Exception e) {
+			return new ResponseEntity<>(e, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		
+	}
 	
 	/**
 	 * GET method for getting a list with the given list ID

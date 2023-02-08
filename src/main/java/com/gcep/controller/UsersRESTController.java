@@ -5,6 +5,10 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,10 +19,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.gcep.data.TempUsersDataService;
 import com.gcep.data.UsersDataService;
 import com.gcep.data.UsersDataServiceInterface;
 import com.gcep.model.StatusModel;
 import com.gcep.model.UserModel;
+import com.gcep.security.TokenUtility;
 
 /**
  * Provides the REST service endpoints for user data operations
@@ -33,6 +39,30 @@ public class UsersRESTController {
 	
 	@Autowired
 	UsersDataService usersDataService;
+	@Autowired
+	private TokenUtility tokenUtility;
+	@Autowired
+	AuthenticationManager authManager;
+	
+	@PostMapping("/login")
+	public ResponseEntity<?> userLogin(@RequestBody UserModel user) {
+		try {
+			Authentication auth = authManager.authenticate(
+					new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
+			
+			User userDetails = (User)auth.getPrincipal();
+			String token = tokenUtility.generateToken(userDetails);
+			
+			return new ResponseEntity<>(new StatusModel("token", token), HttpStatus.OK);
+		} catch (Exception e) {
+			return new ResponseEntity<>(new StatusModel("error", e.getMessage()), HttpStatus.BAD_REQUEST);
+		}
+	}
+	
+	@GetMapping("/test") 
+	public ResponseEntity<?> test() {
+		return new ResponseEntity<>(usersDataService.getUserByUsername("bobby"), HttpStatus.I_AM_A_TEAPOT);
+	}
 	
 	/**
 	 * POST method for adding a new user. All fields must be valid.
