@@ -26,6 +26,8 @@ public class AppSecurityConfig {
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		
+		http.oauth2Client();
+		
 		http.csrf().disable()
 		.authorizeRequests()
 		.antMatchers("/lists/**").authenticated()
