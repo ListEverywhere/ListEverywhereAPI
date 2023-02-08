@@ -49,7 +49,12 @@ public class ItemsService {
 		
 		var response = restTemplate.exchange(url, HttpMethod.POST, req, respType);
 		
-		return response.getBody().get("food");
+		FoodItemModel retval = response.getBody().get("food");
+		
+		if (retval == null) {
+			return new FoodItemModel(food_id, "Unknown");
+		}
+		return retval;
 	}
 	
 	public List<FoodItemModel> searchItems(String search_term) throws IOException {

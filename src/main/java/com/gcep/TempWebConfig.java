@@ -17,7 +17,7 @@ public class TempWebConfig {
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		http.oauth2Client();
 		
-		http.authorizeRequests().anyRequest().permitAll();
+		http.csrf().disable().authorizeRequests().anyRequest().permitAll();
 		
 		return http.build();
 	}

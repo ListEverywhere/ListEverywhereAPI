@@ -15,7 +15,15 @@ public class FoodItemModel {
 	public FoodItemModel(int food_id, String food_name) {
 		super();
 		this.food_id = food_id;
-		this.food_name = food_name;
+		
+		if (food_name == null) {
+			this.food_name = "Unknown";
+		}
+		else {
+			this.food_name = food_name;
+		}
+		
+		
 	}
 
 	public int getFood_id() {
