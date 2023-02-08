@@ -25,9 +25,11 @@ import com.gcep.mapper.RecipeItemMapper;
 import com.gcep.mapper.RecipeMapper;
 import com.gcep.mapper.RecipeStepMapper;
 import com.gcep.model.CategoryModel;
+import com.gcep.model.FoodItemModel;
 import com.gcep.model.RecipeItemModel;
 import com.gcep.model.RecipeModel;
 import com.gcep.model.RecipeStepModel;
+import com.gcep.service.ItemsService;
 
 /**
  * Provides the necessary operations for recipe information.
@@ -41,6 +43,9 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 	@Autowired
 	DataSource dataSource;
 	JdbcTemplate jdbc;
+	
+	@Autowired
+	private ItemsService itemsService;
 	
 	public RecipesDataService(DataSource ds) {
 		this.dataSource = ds;
@@ -76,6 +81,10 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 			items = jdbc.query("SELECT recipes_items.*, recipes.recipe_id FROM recipes_items "
 					+ "INNER JOIN recipes ON recipes_items.recipe_id=recipes.recipe_id WHERE recipes_items.recipe_id=?",
 					new RecipeItemMapper(), new Object[] { recipe.getRecipeId()});
+			for (int i = 0; i < items.size(); i++) {
+				FoodItemModel item = itemsService.getItem(items.get(i).getItemId());
+				items.get(i).setItemName(item.getFood_name());
+			}
 		} catch (Exception e) {
 			throw new DatabaseErrorException(e.getMessage());
 		}
