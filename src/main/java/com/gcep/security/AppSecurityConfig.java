@@ -28,6 +28,12 @@ public class AppSecurityConfig {
 		
 		http.csrf().disable()
 		.authorizeRequests()
+		.antMatchers("/lists/**").authenticated()
+		.and()
+		.authorizeRequests()
+		.antMatchers("/recipes/**").authenticated()
+		.and()
+		.authorizeRequests()
 		.antMatchers("/users/login/").permitAll()
 		.anyRequest().authenticated()
 		;
