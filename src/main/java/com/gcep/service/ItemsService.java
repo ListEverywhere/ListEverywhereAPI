@@ -1,11 +1,9 @@
 package com.gcep.service;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -43,38 +41,57 @@ public class ItemsService {
 	 * If the food item ID is invalid, item name is set to "Unknown"
 	 * @param food_id ID number of the food item
 	 * @return FoodItemModel object
-	 */
-	public FoodItemModel getItem(int food_id) {
+	 */	
+	public FoodItemModel getItem(int food_id) throws IOException {
 		// gets the current access token
-		String token = apiTokenManager.getToken();
-		
-		// builds request URL and adds query parameters
-		String url = UriComponentsBuilder.fromHttpUrl(resourceUrl)
-				.queryParam("method", "food.get.v2")
-				.queryParam("food_id", food_id)
-				.queryParam("format", "json")
-				.encode()
-				.toUriString();
-		
-		// adds authorization header containing access token
-		HttpHeaders headers = new HttpHeaders();
-		headers.add(AUTHORIZE, "Bearer " + token);
-		HttpEntity<Void> req = new HttpEntity<>(headers);
-		
-		// initializes object containing the return type
-		ParameterizedTypeReference<Map<String, FoodItemModel>> respType = new ParameterizedTypeReference<Map<String, FoodItemModel>>() {};
-		
-		// sends HTTP request
-		var response = restTemplate.exchange(url, HttpMethod.POST, req, respType);
-		
-		// get the FoodItemModel from the JSON data
-		FoodItemModel retval = response.getBody().get("food");
-		
-		// if the food item is null, set name to "Unknown"
-		if (retval == null) {
-			return new FoodItemModel(food_id, "Unknown");
-		}
-		return retval;
+				String token = apiTokenManager.getToken();
+				
+				// builds request URL and adds query parameters
+				String url = UriComponentsBuilder.fromHttpUrl(resourceUrl)
+						.queryParam("method", "food.get.v2")
+						.queryParam("food_id", food_id)
+						.queryParam("format", "json")
+						.encode()
+						.toUriString();
+				
+				// adds authorization header containing access token
+				HttpHeaders headers = new HttpHeaders();
+				headers.add(AUTHORIZE, "Bearer " + token);
+				HttpEntity<Void> req = new HttpEntity<>(headers);
+				
+				System.out.println("ItemsService: ID=" + food_id);
+				
+				// sends HTTP request
+				var response = restTemplate.exchange(url, HttpMethod.POST, req, String.class);
+				
+				// creates the object mapper instance
+				ObjectMapper mapper = new ObjectMapper();
+				
+				// gets JSON data from API
+				JsonNode data = mapper.readTree(response.getBody());
+				
+				// if error key exists, log error from API and return Unknown food item
+				var err = data.get("error");
+				if (err != null) {
+					System.out.println("ItemsService ERROR: " + err.get("message"));
+					return new FoodItemModel(food_id, "Unknown");
+				}
+				
+				// get the food item information
+				JsonNode food = mapper.readTree(response.getBody()).get("food");
+				
+				// create the reader that will parse JsonNode into objects
+				ObjectReader reader = mapper.readerFor(new TypeReference<FoodItemModel>() {});
+				
+				// convert JsonNode into a list of FoodItemModel objects
+				FoodItemModel item = reader.readValue(food);
+				
+				// if the food item is null, set name to "Unknown"
+				if (item == null) {
+					return new FoodItemModel(food_id, "Unknown");
+				}
+				
+				return item;
 	}
 	
 	/**
@@ -108,8 +125,18 @@ public class ItemsService {
 		// creates the object mapper instance
 		ObjectMapper mapper = new ObjectMapper();
 		
+		// gets JSON data from API
+		JsonNode data = mapper.readTree(response.getBody());
+		
+		// if error key exists, log error from API and return Unknown food item
+		var err = data.get("error");
+		if (err != null) {
+			System.out.println("ItemsService ERROR: " + err.get("message"));
+			return new ArrayList<FoodItemModel>();
+		}
+		
 		// gets the list of items that are nested inside two keys
-		JsonNode food = mapper.readTree(response.getBody()).get("foods").get("food");
+		JsonNode food = data.get("foods").get("food");
 		
 		// create the reader that will parse JsonNode into objects
 		ObjectReader reader = mapper.readerFor(new TypeReference<List<FoodItemModel>>() {});
