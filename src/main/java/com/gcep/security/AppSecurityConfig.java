@@ -14,6 +14,11 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import com.gcep.service.UsersService;
 
+/**
+ * This class holds the configuration for Spring Security, including Http Security, PasswordEncoder, and AuthenticationManager
+ * @author Gabriel Cepleanu
+ * @version 0.1.1
+ */
 @Configuration
 public class AppSecurityConfig {
 	
@@ -23,11 +28,21 @@ public class AppSecurityConfig {
 	private TokenFilter tokenFilter;
 	
 	
+	/**
+	 * Configures HTTP security for the application endpoints.
+	 * Also initializes OAuth2 client and JWT Token filter classes.
+	 * @param http Http Security
+	 * @return HTTP security builder
+	 * @throws Exception
+	 */
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		
+		// initializes the OAuth2 client for third party API integration
 		http.oauth2Client();
 		
+		// configures the application endpoints
+		// all endpoints require valid JWT token except for login
 		http.csrf().disable()
 		.authorizeRequests()
 		.antMatchers("/lists/**").authenticated()
@@ -40,16 +55,26 @@ public class AppSecurityConfig {
 		.anyRequest().authenticated()
 		;
 		
+		// configures the JWT token filter
 		http.addFilterBefore(tokenFilter, UsernamePasswordAuthenticationFilter.class);
 		
+		// returns HTTP security builder
 		return http.build();
 	}
 	
+	/**
+	 * Initializes the PasswordEncoder for database passwords using BCrypt
+	 * @return
+	 */
 	@Bean
 	public static PasswordEncoder passwordEncode() {
 		return new BCryptPasswordEncoder();
 	}
 	
+	/**
+	 * Configures the UserDetailsService for authentication using encrypted passwords.
+	 * @return DAO Authentication provider
+	 */
 	@Bean
 	public DaoAuthenticationProvider authProvider() {
 		DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
@@ -61,6 +86,12 @@ public class AppSecurityConfig {
 		
 	}
 	
+	/**
+	 * Configures the authentication manager to process authentication requests
+	 * @param authConfig
+	 * @return Authentication manager
+	 * @throws Exception
+	 */
 	@Bean
 	public AuthenticationManager authManager(AuthenticationConfiguration authConfig) throws Exception {
 		return authConfig.getAuthenticationManager();
