@@ -4,3 +4,5 @@ com.gcep.data
 com.gcep.exception
 com.gcep.mapper
 com.gcep.model
+com.gcep.security
+com.gcep.service

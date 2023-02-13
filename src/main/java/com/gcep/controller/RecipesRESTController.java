@@ -43,12 +43,15 @@ public class RecipesRESTController {
 	 */
 	@GetMapping("/{id}")
 	public ResponseEntity<?> getRecipeById(@PathVariable(name="id") int id) {
+		// use DAO to get recipe by id
 		RecipeModel recipe = recipesDataService.getRecipeById(id);
 		
 		if (recipe != null) {
+			// recipe was found
 			return new ResponseEntity<>(recipe, HttpStatus.OK);
 		}
 		else {
+			// recipe does not exist
 			return new ResponseEntity<>(new StatusModel("error", "Recipe not found."), HttpStatus.NOT_FOUND);
 		}
 		
@@ -61,12 +64,15 @@ public class RecipesRESTController {
 	 */
 	@GetMapping("/categories/{id}")
 	public ResponseEntity<?> getRecipesByCategory(@PathVariable(name="id") int id) {
+		// use DAO to return list of recipes with category id
 		List<RecipeModel> recipes = recipesDataService.getRecipesByCategory(id);
 		
 		if (recipes != null && recipes.size() > 0) {
+			// list of recipes is more than 0
 			return new ResponseEntity<>(recipes, HttpStatus.OK);
 		}
 		else {
+			// no recipes found
 			return new ResponseEntity<>(new StatusModel("error", "Recipes not found"), HttpStatus.NOT_FOUND);
 		}
 	}
@@ -78,12 +84,15 @@ public class RecipesRESTController {
 	 */
 	@GetMapping("/user/{id}")
 	public ResponseEntity<?> getRecipesByUserId(@PathVariable(name="id") int id) {
+		// use DAO to return list of recipes by user id
 		List<RecipeModel> recipes = recipesDataService.getRecipesByUser(id);
 		
 		if (recipes != null && recipes.size() > 0) {
+			// list of recipes is more than 0
 			return new ResponseEntity<>(recipes, HttpStatus.OK);
 		}
 		else {
+			// no recipes found
 			return new ResponseEntity<>(new StatusModel("error", "Recipes not found"), HttpStatus.NOT_FOUND);
 		}
 	}
@@ -95,12 +104,15 @@ public class RecipesRESTController {
 	 */
 	@PostMapping("/")
 	public ResponseEntity<?> createRecipe(@RequestBody RecipeModel recipe) {
+		// use DAO to create new recipe (ignoring items and steps)
 		int result = recipesDataService.addRecipe(recipe);
 		
 		if (result > 0) {
+			// recipe was created
 			return new ResponseEntity<>(new StatusModel("success", "Successfully created recipe."), HttpStatus.OK);
 		}
 		else {
+			// failed to create recipe
 			return new ResponseEntity<>(new StatusModel("error", "Failed to create recipe."), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
@@ -112,12 +124,15 @@ public class RecipesRESTController {
 	 */
 	@PutMapping("/")
 	public ResponseEntity<?> updateRecipe(@RequestBody RecipeModel updated) {
+		// use DAO to update recipe (ignores items and steps)
 		RecipeModel result = recipesDataService.updateRecipe(updated);
 		
 		if (result != null) {
+			// recipe was updated
 			return new ResponseEntity<>(new StatusModel("success", "Successfully updated recipe."), HttpStatus.OK);
 		}
 		else {
+			// failed to update recipe
 			return new ResponseEntity<>(new StatusModel("error", "Failed to update recipe."), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
@@ -129,12 +144,15 @@ public class RecipesRESTController {
 	 */
 	@DeleteMapping("/{id}")
 	public ResponseEntity<?> deleteRecipe(@PathVariable(name="id") int id) {
+		// use DAO to delete a recipe
 		int result = recipesDataService.deleteRecipeById(id);
 		
 		if (result > 0) {
+			// recipe was deleted
 			return new ResponseEntity<>(new StatusModel("success", "Successfully deleted recipe."), HttpStatus.OK);
 		}
 		else {
+			// failed to delete recipe
 			return new ResponseEntity<>(new StatusModel("error", "Failed to delete recipe."), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
@@ -146,12 +164,15 @@ public class RecipesRESTController {
 	 */
 	@PostMapping("/publish/{id}")
 	public ResponseEntity<?> publishRecipe(@PathVariable(name="id") int recipe_id) {
+		// use DAO to mark a recipe for publishing
 		boolean result = recipesDataService.recipePublish(recipe_id);
 		
 		if (result) {
+			// recipe was marked for publishing, but is not yet approved
 			return new ResponseEntity<>(new StatusModel("success", "Recipe was successfully submitted for publishing. Recipe will not be published until it is approved by an administrator."), HttpStatus.OK);
 		}
 		else {
+			// recipe is already marked for publishing or is already published
 			return new ResponseEntity<>(new StatusModel("error", "There was an error submitting a recipe for publishing."), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
@@ -162,12 +183,15 @@ public class RecipesRESTController {
 	 */
 	@GetMapping("/categories/")
 	public ResponseEntity<?> getCategories() {
+		// use DAO to get list of all categories
 		List<CategoryModel> categories = recipesDataService.getCategories();
 		
 		if (categories != null && categories.size() > 0) {
+			// categories found
 			return new ResponseEntity<>(categories, HttpStatus.OK);
 		}
 		else {
+			// no categories available
 			return new ResponseEntity<>(new StatusModel("error", "No categories found."), HttpStatus.NOT_FOUND);
 		}
 	}
@@ -179,12 +203,15 @@ public class RecipesRESTController {
 	 */
 	@GetMapping("/categories/category/{id}")
 	public ResponseEntity<?> getCategoryById(@PathVariable(name="id") int id) {
+		// use DAO to get category information
 		CategoryModel category = recipesDataService.getCategoryById(id);
 		
 		if (category != null) {
+			// category was found
 			return new ResponseEntity<>(category, HttpStatus.OK);
 		}
 		else {
+			// category does not exist
 			return new ResponseEntity<>(new StatusModel("error", "Category not found."), HttpStatus.NOT_FOUND);
 		}
 	}
@@ -196,12 +223,15 @@ public class RecipesRESTController {
 	 */
 	@PostMapping("/steps/")
 	public ResponseEntity<?> addRecipeStep(@RequestBody RecipeStepModel step) {
+		// use DAO to add a new recipe step
 		int result = recipesDataService.addRecipeStep(step);
 		
 		if (result > 0) {
+			// recipe step was added
 			return new ResponseEntity<>(new StatusModel("success", "Successfully added step."), HttpStatus.OK);
 		}
 		else {
+			// failed to add recipe step
 			return new ResponseEntity<>(new StatusModel("error", "Failed to create step."), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
@@ -213,12 +243,15 @@ public class RecipesRESTController {
 	 */
 	@PutMapping("/steps/")
 	public ResponseEntity<?> updateRecipeStep(@RequestBody RecipeStepModel updated) {
+		// use DAO to update a recipe step
 		RecipeStepModel result = recipesDataService.updateRecipeStep(updated);
 		
 		if (result != null) {
+			// recipe step was updated
 			return new ResponseEntity<>(new StatusModel("success", "Successfully updated step."), HttpStatus.OK);
 		}
 		else {
+			// failed to update recipe step
 			return new ResponseEntity<>(new StatusModel("error", "Failed to update step."), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
@@ -230,12 +263,15 @@ public class RecipesRESTController {
 	 */
 	@DeleteMapping("/steps/{id}") 
 	public ResponseEntity<?> deleteRecipeStep(@PathVariable(name="id") int id) {
+		// use DAO to delete recipe step
 		int result = recipesDataService.deleteRecipeStep(id);
 		
 		if (result > 0) {
+			// recipe step was deleted
 			return new ResponseEntity<>(new StatusModel("success", "Successfully deleted step."), HttpStatus.OK);
 		}
 		else {
+			// failed to delete recipe step
 			return new ResponseEntity<>(new StatusModel("error", "Failed to delete step."), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
@@ -247,12 +283,15 @@ public class RecipesRESTController {
 	 */
 	@PostMapping("/items/")
 	public ResponseEntity<?> addRecipeItem(@RequestBody RecipeItemModel item) {
+		// use DAO to add new recipe item
 		int result = recipesDataService.addRecipeItem(item);
 		
 		if (result > 0) {
+			// recipe item was added
 			return new ResponseEntity<>(new StatusModel("success", "Recipe item was successfully added"), HttpStatus.OK);
 		}
 		else {
+			// failed to add recipe item
 			return new ResponseEntity<>(new StatusModel("error", "Failed to add recipe item."), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
@@ -264,12 +303,15 @@ public class RecipesRESTController {
 	 */
 	@PutMapping("/items/")
 	public ResponseEntity<?> updateRecipeItem(@RequestBody RecipeItemModel updated) {
+		// use DAO to update recipe item
 		RecipeItemModel result = recipesDataService.updateRecipeItem(updated);
 		
 		if (result != null) {
+			// recipe item was updated
 			return new ResponseEntity<>(new StatusModel("success", "Recipe item was successfully updated"), HttpStatus.OK);
 		}
 		else {
+			// failed to update recipe item
 			return new ResponseEntity<>(new StatusModel("error", "Failed to updated recipe item."), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
@@ -281,12 +323,15 @@ public class RecipesRESTController {
 	 */
 	@DeleteMapping("/items/{id}")
 	public ResponseEntity<?> deleteRecipeItem(@PathVariable(name="id") int id) {
+		// use DAO to delete recipe item
 		int result = recipesDataService.deleteRecipeItem(id);
 		
 		if (result > 0) {
+			// recipe item was deleted
 			return new ResponseEntity<>(new StatusModel("success", "Recipe item was successfully deleted"), HttpStatus.OK);
 		}
 		else {
+			// failed to delete recipe item
 			return new ResponseEntity<>(new StatusModel("error", "Failed to delete recipe item."), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}

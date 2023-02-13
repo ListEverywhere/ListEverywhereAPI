@@ -43,21 +43,36 @@ public class UsersRESTController {
 	@Autowired
 	AuthenticationManager authManager;
 	
+	/**
+	 * Authenticates an existing user with valid credentials and returns a JWT token.
+	 * @param user The user credentials (username and password)
+	 * @return JSON response
+	 */
 	@PostMapping("/login")
 	public ResponseEntity<?> userLogin(@RequestBody UserModel user) {
 		try {
+			// use the authentication manager to check provided credentials
 			Authentication auth = authManager.authenticate(
 					new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
 			
+			// get UserDetails object for the current user
 			User userDetails = (User)auth.getPrincipal();
+			
+			// generate a new JWT token
 			String token = tokenUtility.generateToken(userDetails);
 			
+			// return the JWT token for the user
 			return new ResponseEntity<>(new StatusModel("token", token), HttpStatus.OK);
 		} catch (Exception e) {
+			// credentials are not valid, send error
 			return new ResponseEntity<>(new StatusModel("error", e.getMessage()), HttpStatus.BAD_REQUEST);
 		}
 	}
 	
+	/**
+	 * Test method that returns a single hard-coded user. Will be removed in a future version
+	 * @return
+	 */
 	@GetMapping("/test") 
 	public ResponseEntity<?> test() {
 		return new ResponseEntity<>(usersDataService.getUserByUsername("bobby"), HttpStatus.I_AM_A_TEAPOT);
@@ -70,18 +85,21 @@ public class UsersRESTController {
 	 */
 	@PostMapping("/")
 	public ResponseEntity<?> registerUser(@RequestBody @Valid UserModel user) {
+		// use DAO to register the user
 		int result = usersDataService.addUser(user);
 		
 		if (result > 0) {
+			// user was registered
 			return new ResponseEntity<>(new StatusModel("success", "User successfully added"), HttpStatus.OK);
 		}
 		else {
+			// failed to register user
 			return new ResponseEntity<>(new StatusModel("error", "Error adding user."), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 	
 	/**
-	 * GET method for returning a list of all users.
+	 * GET method for returning a list of all users. Will be removed in a later version.
 	 * @return JSON response
 	 */
 	@GetMapping("/")
@@ -96,12 +114,15 @@ public class UsersRESTController {
 	 */
 	@PutMapping("/")
 	public ResponseEntity<?> updateUser(@RequestBody UserModel updated) {
+		// use DAO to update user information
 		UserModel result = usersDataService.updateUser(updated);
 		
 		if (result != null) {
+			// user was updated
 			return new ResponseEntity<>(new StatusModel("success", "User successfully updated"), HttpStatus.OK);
 		}
 		else {
+			// failed to update user
 			return new ResponseEntity<>(new StatusModel("error", "Error updating user."), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
@@ -113,12 +134,15 @@ public class UsersRESTController {
 	 */
 	@DeleteMapping("/{id}")
 	public ResponseEntity<?> deleteUser(@PathVariable(name="id") int id) {
+		// use DAO to delete user
 		boolean result = usersDataService.deleteUser(id);
 		
 		if (result) {
+			// user was deleted
 			return new ResponseEntity<>(new StatusModel("success", "User successfully deleted"), HttpStatus.OK);
 		}
 		else {
+			// failed to delete user
 			return new ResponseEntity<>(new StatusModel("error", "Error deleting user."), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}

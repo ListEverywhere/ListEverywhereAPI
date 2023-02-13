@@ -27,9 +27,12 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 	protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
             HttpHeaders headers, HttpStatus status, WebRequest request) {
 		
+		// get all validation errors and place them in a list
 		List<String> err = ex.getBindingResult().getFieldErrors().stream().map(msg -> msg.getDefaultMessage()).collect(Collectors.toList());
+		// create error StatusModel containing all field errors
 		StatusModel retStatus = new StatusModel("error", err.toArray(new String[err.size()]));
 		
+		// return StatusModel JSON data
 		return new ResponseEntity<>(retStatus, headers, status);
 		
 	}

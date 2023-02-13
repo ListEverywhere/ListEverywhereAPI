@@ -60,6 +60,7 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 	private List<RecipeStepModel> getRecipeSteps(RecipeModel recipe) {
 		List<RecipeStepModel> steps = null;
 		try {
+			// run query to get recipe steps from given recipe
 			steps = jdbc.query("SELECT recipes_steps.*, recipes.recipe_id FROM recipes_steps "
 					+ "INNER JOIN recipes ON recipes.recipe_id=recipes_steps.recipe_id WHERE recipes.recipe_id=?",
 					new RecipeStepMapper(), new Object[] {recipe.getRecipeId()});
@@ -67,6 +68,7 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 			throw new DatabaseErrorException(e.getMessage());
 		}
 		
+		// return the list of steps
 		return steps;
 	}
 	
@@ -78,16 +80,22 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 	private List<RecipeItemModel> getRecipeItems(RecipeModel recipe) {
 		List<RecipeItemModel> items = null;
 		try {
+			// run query to get recipe items from given recipe
 			items = jdbc.query("SELECT recipes_items.*, recipes.recipe_id FROM recipes_items "
 					+ "INNER JOIN recipes ON recipes_items.recipe_id=recipes.recipe_id WHERE recipes_items.recipe_id=?",
 					new RecipeItemMapper(), new Object[] { recipe.getRecipeId()});
+			
+			// go through each item and set item name
 			for (int i = 0; i < items.size(); i++) {
+				// use ItemsService to get item name
 				FoodItemModel item = itemsService.getItem(items.get(i).getItemId());
+				// set the item name
 				items.get(i).setItemName(item.getFood_name());
 			}
 		} catch (Exception e) {
 			throw new DatabaseErrorException(e.getMessage());
 		}
+		// return the list of recipe items
 		return items;
 	}
 	
@@ -99,9 +107,13 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 	private List<RecipeModel> addStepsItemsToRecipeList(List<RecipeModel> recipes) {
 		List<RecipeModel> retval = new ArrayList<RecipeModel>();
 		
+		// for each recipe, populate items and steps
 		for (int i = 0; i < recipes.size(); i++) {
+			// get the recipe
 			var recipe = recipes.get(i);
+			// get the steps
 			recipe.setRecipeSteps(getRecipeSteps(recipe));
+			// get the items
 			recipe.setRecipeItems(getRecipeItems(recipe));
 			retval.add(recipe);
 		}
@@ -114,9 +126,12 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 		RecipeModel recipe = null;
 		
 		try {
+			// run query to get recipe by ID
 			recipe = jdbc.queryForObject("SELECT recipes.*, users_recipes.* FROM recipes "
 					+ "INNER JOIN users_recipes ON users_recipes.recipe_id=recipes.recipe_id WHERE recipes.recipe_id=?", new RecipeMapper(), new Object[] {id});
+			// populate steps
 			recipe.setRecipeSteps(getRecipeSteps(recipe));
+			// populate items
 			recipe.setRecipeItems(getRecipeItems(recipe));
 		}
 		catch (EmptyResultDataAccessException e) {
@@ -133,8 +148,10 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 		List<RecipeModel> recipes = null;
 		
 		try {
+			// run query to get recipes with matching user id
 			var recipesInit = jdbc.query("SELECT recipes.*, users_recipes.user_id, users_recipes.recipe_id FROM recipes "
 					+ "INNER JOIN users_recipes ON recipes.recipe_id=users_recipes.recipe_id WHERE users_recipes.user_id=?", new RecipeMapper(), new Object[] {user_id});
+			// populate items and steps for each recipe
 			recipes = addStepsItemsToRecipeList(recipesInit);
 		} catch (Exception e) {
 			throw new DatabaseErrorException();
@@ -147,9 +164,11 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 		List<RecipeModel> recipes = null;
 		
 		try {
+			// run query to get recipes with matching category
 			var recipesInit = jdbc.query("SELECT recipes.*, categories.category_id, users_recipes.* FROM recipes "
 					+ "INNER JOIN categories ON recipes.category=categories.category_id "
 					+ "INNER JOIN users_recipes ON users_recipes.recipe_id=recipes.recipe_id WHERE category_id=?", new RecipeMapper(), new Object[] {category});
+			// populate items and steps for each recipe
 			recipes = addStepsItemsToRecipeList(recipesInit);
 		} catch (Exception e) {
 			throw new DatabaseErrorException();
@@ -159,11 +178,13 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 
 	@Override
 	public int addRecipe(RecipeModel recipe) {
+		// initialize key variable (row ID)
 		KeyHolder key = new GeneratedKeyHolder();
 		int result = 0;
 		
 		try {
 			jdbc.update(
+					// create query that returns the key of the newly-created row (PK)
 					new PreparedStatementCreator() {
 
 						@Override
@@ -177,9 +198,11 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 						
 					},
 					key);
+			// perform second query to create entry for link between user and recipe
 			result = jdbc.update("INSERT INTO users_recipes (recipe_id, user_id) VALUES (?,?)",
 					key.getKey(), recipe.getUserId());
 		} catch (DataIntegrityViolationException e) {
+			// delete the recipe that was created as user does not exist
 			this.deleteRecipeById(key.getKey().intValue());
 			throw new DatabaseErrorException("User does not exist.");
 		}
@@ -194,10 +217,12 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 	public RecipeModel updateRecipe(RecipeModel updated) {
 		RecipeModel recipe = null;
 		try {
+			// run query to update recipe information
 			int result = jdbc.update("UPDATE recipes SET category=?, recipe_name=?, recipe_description=? WHERE recipe_id=?",
 					updated.getCategory(), updated.getRecipeName(), updated.getRecipeDescription(), updated.getRecipeId());
 			
 			if (result > 0) {
+				// recipe was updated, make variable not null
 				recipe = updated;
 			}
 		} catch (Exception e) {
@@ -211,6 +236,7 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 		int result = 0;
 		
 		try {
+			// run query to delete the recipe
 			result = jdbc.update("DELETE FROM recipes WHERE recipe_id=?", recipe_id);
 		} catch (Exception e) {
 			throw new DatabaseErrorException();
@@ -223,14 +249,17 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 		int result = 0;
 		
 		try {
+			// run query to insert recipe id into published table
 			result = jdbc.update("INSERT INTO recipes_published (recipe_id) VALUES (?)", recipe_id);
 		} 
 		catch (DuplicateKeyException e) {
+			// recipe already has entry in the published table, return error
 			throw new DatabaseErrorException("This recipe has already been submitted for publishing or is already published.");
 		}
 		catch (Exception e) {
-			throw new DatabaseErrorException(e.getClass().getName());
+			throw new DatabaseErrorException();
 		}
+		// return status of transaction
 		return result > 0;
 	}
 
@@ -239,10 +268,11 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 		int result = 0;
 		
 		try {
+			// run query to add a new recipe step
 			result = jdbc.update("INSERT INTO recipes_steps (step_description, recipe_id) VALUES (?,?)",
 					step.getStepDescription(), step.getRecipeId());
 		} catch (Exception e) {
-			throw new DatabaseErrorException(e.getMessage());
+			throw new DatabaseErrorException();
 		}
 		return result;
 	}
@@ -251,13 +281,15 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 	public RecipeStepModel updateRecipeStep(RecipeStepModel updated) {
 		RecipeStepModel result = null;
 		try {
+			// run query to update a recipe step
 			int success = jdbc.update("UPDATE recipes_steps SET step_description=? WHERE recipe_step_id=?",
 					updated.getStepDescription(), updated.getRecipeStepId());
 			if (success > 0) {
+				// set variable as not null
 				result = updated;
 			}
 		} catch (Exception e) {
-			throw new DatabaseErrorException(e.getMessage());
+			throw new DatabaseErrorException();
 		}
 		return result;
 	}
@@ -267,9 +299,10 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 		int result = 0;
 		
 		try {
+			// run query to delete a recipe step
 			result = jdbc.update("DELETE FROM recipes_steps WHERE recipe_step_id=?", recipe_step_id);
 		} catch (Exception e) {
-			throw new DatabaseErrorException(e.getMessage());
+			throw new DatabaseErrorException();
 		}
 		
 		return result;
@@ -279,6 +312,7 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 	public List<CategoryModel> getCategories() {
 		List<CategoryModel> categories = null;
 		try {
+			// run query to select all categories available
 			categories = jdbc.query("SELECT * FROM categories", new CategoryMapper());
 		} catch (Exception e) {
 			throw new DatabaseErrorException(e.getMessage());
@@ -290,6 +324,7 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 	public CategoryModel getCategoryById(int category) {
 		CategoryModel retval = null;
 		try {
+			// run query to return category with matching ID
 			retval = jdbc.queryForObject("SELECT * FROM categories WHERE category_id=?", new CategoryMapper(), new Object[] {category});
 		} catch (Exception e) {
 			throw new DatabaseErrorException(e.getMessage());
@@ -301,6 +336,7 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 	public int addRecipeItem(RecipeItemModel item) {
 		int result = 0;
 		try {
+			// run query to add a new recipe item
 			result = jdbc.update("INSERT INTO recipes_items (recipe_id, item_id) VALUES (?,?)",
 					item.getRecipeId(),
 					item.getItemId());
@@ -314,9 +350,11 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 	public RecipeItemModel updateRecipeItem(RecipeItemModel updated) {
 		RecipeItemModel retval = null;
 		try {
+			// run query to update a recipe item
 			int result = jdbc.update("UPDATE recipes_items SET item_id=? WHERE recipe_item_id=?",
 					updated.getItemId(),
 					updated.getRecipeItemId());
+			// set variable as not null
 			if (result > 0) {
 				retval = updated;
 			}
@@ -330,6 +368,7 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 	public int deleteRecipeItem(int id) {
 		int result = 0;
 		try {
+			// run query to delete a recipe item
 			result = jdbc.update("DELETE FROM recipes_items WHERE recipe_item_id=?",
 					id);
 		} catch (Exception e) {

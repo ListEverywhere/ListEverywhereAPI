@@ -38,14 +38,19 @@ public class ApiTokenManager {
 	 * @return Access token
 	 */
 	private String getAccessToken() {
+		// initialize client with information supplied
 		OAuth2AuthorizeRequest authorize = OAuth2AuthorizeRequest.withClientRegistrationId(regName).principal(clientId).build();
 		
+		// attempt authorization
 		OAuth2AuthorizedClient client = this.clientMan.authorize(authorize);
 		
+		// get the token from the request
 		OAuth2AccessToken token = client.getAccessToken();
 		
+		// get the token String value and set class variable
 		this.currentToken = token.getTokenValue();
 		
+		// return current token
 		return this.currentToken;
 	}
 	

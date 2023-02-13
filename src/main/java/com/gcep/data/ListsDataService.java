@@ -61,13 +61,19 @@ public class ListsDataService implements ListsDataServiceInterface {
 		List<ItemModel> itemList = new ArrayList<ItemModel>();
 		// get ListItems
 		try {
+			// run query to get list items from specified list
 			var items = jdbcTemplate.query("SELECT lists.list_id, lists_items.* FROM lists_items "
 					+ "INNER JOIN lists ON lists_items.list_id=lists.list_id WHERE lists.list_id=?",
 					new ListItemMapper(), new Object[] { list.getListId()});
+			
+			// loop through each list item to get item name
 			for (int i = 0; i < items.size(); i++) {
+				// use ItemsService to get item details
 				FoodItemModel item = itemsService.getItem(items.get(i).getItemId());
+				// set the item name from the ItemsService
 				items.get(i).setItemName(item.getFood_name());
 			}
+			// add each item to the returned item list
 			itemList.addAll(items);
 		} catch (Exception e) {
 			throw new DatabaseErrorException(e.getMessage());
@@ -75,9 +81,11 @@ public class ListsDataService implements ListsDataServiceInterface {
 		
 		// get CustomListItems
 		try {
+			// run query to get custom list items from specified list
 			var items = jdbcTemplate.query("SELECT lists.list_id, lists_items_custom.* FROM lists_items_custom "
 					+ "INNER JOIN lists ON lists_items_custom.list_id=lists.list_id WHERE lists.list_id=?",
 					new CustomListItemMapper(), new Object[] { list.getListId()});
+			// add custom list items to returned item list
 			itemList.addAll(items);
 		} catch (Exception e) {
 			throw new DatabaseErrorException(e.getMessage());
@@ -96,6 +104,7 @@ public class ListsDataService implements ListsDataServiceInterface {
 			list = jdbcTemplate.queryForObject("SELECT lists.*, users_lists.user_id, users_lists.list_id FROM lists "
 					+ "INNER JOIN users_lists ON lists.list_id=users_lists.list_id WHERE lists.list_id=?",
 					new ListMapper(), new Object[] {id});
+			// get all items for the list
 			list.setListItems(getListItems(list));
 		} catch (Exception e) {
 			// an error with the database has occurred
@@ -108,13 +117,17 @@ public class ListsDataService implements ListsDataServiceInterface {
 	public List<ListModel> getListsByUser(int user_id) {
 		List<ListModel> lists = null;
 		try {
+			// run query to get all lists with a matching user id
 			lists = jdbcTemplate.query("SELECT lists.*, users_lists.user_id, users_lists.list_id FROM lists "
 					+ "INNER JOIN users_lists ON lists.list_id=users_lists.list_id WHERE users_lists.user_id=?", 
 					new ListMapper(), new Object[] {user_id});
-			// get list items for each list returned
+			
+			// populate each list with items
 			for (int i = 0; i < lists.size(); i++) {
 				var newList = lists.get(i);
+				// get the items and item information
 				newList.setListItems(getListItems(newList));
+				// replace unpopulated list with populated list
 				lists.set(i, newList);
 			}
 		} catch (Exception e) {
@@ -198,10 +211,12 @@ public class ListsDataService implements ListsDataServiceInterface {
 		try {
 			// check what type of item is given so that the appropriate table is updated
 			if (item instanceof ListItemModel) {
+				// list item, uses ID instead of name
 				ListItemModel current = (ListItemModel) item;
 				result = jdbcTemplate.update("INSERT INTO lists_items (list_id, item_id, checked) VALUES (?,?,false)", current.getListId(), current.getItemId());
 				
 			} else if (item instanceof CustomListItemModel) {
+				// custom list item, uses Name instead of ID
 				CustomListItemModel current = (CustomListItemModel) item;
 				result = jdbcTemplate.update("INSERT INTO lists_items_custom (list_id, item_name, checked) VALUES (?,?,false)", current.getListId(), current.getItemName());
 			}
@@ -245,6 +260,7 @@ public class ListsDataService implements ListsDataServiceInterface {
 	@Override
 	public int deleteListItem(int id) {
 		int result = 0;
+		// run query to delete a list item
 		try {
 			result = jdbcTemplate.update("DELETE FROM lists_items WHERE list_item_id=?", id);
 		} catch (Exception e) {
@@ -254,12 +270,18 @@ public class ListsDataService implements ListsDataServiceInterface {
 		return result;
 	}
 
+	/**
+	 * TODO: Remove this method
+	 */
 	@Override
 	public List<ItemModel> searchItems(String search_term) {
 		// TODO to be implemented in a future version
 		return null;
 	}
 
+	/**
+	 * TODO: Remove this method
+	 */
 	@Override
 	public int GetItemById(int item_id) {
 		// TODO to be implemented in a future version
@@ -269,6 +291,7 @@ public class ListsDataService implements ListsDataServiceInterface {
 	@Override
 	public int deleteCustomListItem(int id) {
 		int result = 0;
+		// run query to remove custom list item
 		try {
 			result = jdbcTemplate.update("DELETE FROM lists_items_custom WHERE custom_item_id=?", id);
 		} catch (Exception e) {

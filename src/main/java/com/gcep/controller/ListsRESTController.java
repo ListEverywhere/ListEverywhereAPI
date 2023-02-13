@@ -40,6 +40,11 @@ public class ListsRESTController {
 	@Autowired
 	ItemsService itemsService;
 	
+	/**
+	 * Test method for searching for items using the ItemsService. Will be removed in the future.
+	 * @param search_term
+	 * @return
+	 */
 	@GetMapping("/test/{search_term}")
 	public ResponseEntity<?> test(@PathVariable(name="search_term") String search_term) {
 		List<FoodItemModel> items = null;
@@ -59,12 +64,15 @@ public class ListsRESTController {
 	 */
 	@GetMapping("/{id}")
 	public ResponseEntity<?> getListById(@PathVariable(name="id") int id) {
+		// use DAO to get the list
 		ListModel result = listsDataService.getListById(id);
 		
 		if (result != null) {
+			// list was found
 			return new ResponseEntity<>(result, HttpStatus.OK);
 		}
 		else {
+			// list does not exist
 			return new ResponseEntity<>(new StatusModel("error", "List not found."), HttpStatus.NOT_FOUND);
 		}
 	}
@@ -76,12 +84,15 @@ public class ListsRESTController {
 	 */
 	@GetMapping("/user/{id}")
 	public ResponseEntity<?> getListsByUser(@PathVariable(name="id") int id) {
+		// use DAO to get lists by user id
 		List<ListModel> lists = listsDataService.getListsByUser(id);
 		
 		if (lists.size() > 0) {
+			// one or more lists were found
 			return new ResponseEntity<>(lists, HttpStatus.OK);
 		}
 		else {
+			// no lists found
 			return new ResponseEntity<>(new StatusModel("error", "No lists were found."), HttpStatus.NOT_FOUND);
 		}
 	}
@@ -94,12 +105,15 @@ public class ListsRESTController {
 	 */
 	@PostMapping("/")
 	public ResponseEntity<?> createList(@RequestBody ListModel list) {
+		// use DAO to create new list, items ignored
 		int result = listsDataService.createList(list);
 		
 		if (result > 0) {
+			// list was created
 			return new ResponseEntity<>(new StatusModel("success", "List successfully created."), HttpStatus.OK);
 		}
 		else {
+			// list failed to create
 			return new ResponseEntity<>(new StatusModel("error", "There was an error creating a list."), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
@@ -112,12 +126,15 @@ public class ListsRESTController {
 	 */
 	@PutMapping("/")
 	public ResponseEntity<?> updateList(@RequestBody ListModel updated) {
+		// use DAO to update list, items ignored
 		ListModel retval = listsDataService.updateList(updated);
 		
 		if (retval != null) {
+			// list update was successful
 			return new ResponseEntity<>(new StatusModel("success", "List successfully updated."), HttpStatus.OK);
 		}
 		else {
+			// list failed to update
 			return new ResponseEntity<>(new StatusModel("error", "There was an error updating the list."), HttpStatus.BAD_REQUEST);
 		}
 	}
@@ -129,12 +146,15 @@ public class ListsRESTController {
 	 */
 	@DeleteMapping("/{id}")
 	public ResponseEntity<?> deleteList(@PathVariable(name="id") int id) {
+		// use DAO to remove list
 		int retval = listsDataService.deleteListById(id);
 		
 		if (retval > 0) {
+			// list was deleted
 			return new ResponseEntity<>(new StatusModel("success", "List successfully deleted."), HttpStatus.OK);
 		}
 		else {
+			// failed to delete list
 			return new ResponseEntity<>(new StatusModel("error", "There was an error deleting the list."), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
@@ -147,12 +167,15 @@ public class ListsRESTController {
 	 */
 	@PostMapping("/items")
 	public ResponseEntity<?> addListItem(@RequestBody ListItemModel item) {
+		// use DAO to add a new item to a list
 		int retval = listsDataService.addListItem(item.getListId(), item);
 		
 		if (retval > 0) {
+			// item was added
 			return new ResponseEntity<>(new StatusModel("success", "Item successfully added."), HttpStatus.OK);
 		}
 		else {
+			// failed to add item
 			return new ResponseEntity<>(new StatusModel("error", "There was an error adding the item."), HttpStatus.BAD_REQUEST);
 		}
 	}
@@ -165,12 +188,15 @@ public class ListsRESTController {
 	 */
 	@PostMapping("/items/custom")
 	public ResponseEntity<?> addCustomListItem(@RequestBody CustomListItemModel item) {
+		// use DAO to add a new custom item to the list (name given by user)
 		int retval = listsDataService.addListItem(item.getListId(), item);
 		
 		if (retval > 0) {
+			// custom item was added
 			return new ResponseEntity<>(new StatusModel("success", "Item successfully added."), HttpStatus.OK);
 		}
 		else {
+			// failed to add custom item
 			return new ResponseEntity<>(new StatusModel("error", "There was an error adding the item."), HttpStatus.BAD_REQUEST);
 		}
 	}
@@ -183,12 +209,15 @@ public class ListsRESTController {
 	 */
 	@PutMapping("/items")
 	public ResponseEntity<?> editListItem(@RequestBody ListItemModel item) {
+		// use DAO to update list item
 		ItemModel retval = listsDataService.editListItem(item);
 		
 		if (retval != null) {
+			// item was updated
 			return new ResponseEntity<>(new StatusModel("success", "List item successfully updated."), HttpStatus.OK);
 		}
 		else {
+			// failed to update item
 			return new ResponseEntity<>(new StatusModel("error", "There was an error updating the list item."), HttpStatus.BAD_REQUEST);
 		}
 	}
@@ -201,12 +230,15 @@ public class ListsRESTController {
 	 */
 	@PutMapping("/items/custom")
 	public ResponseEntity<?> editCustomListItem(@RequestBody CustomListItemModel item) {
+		// use DAO to update custom list item
 		ItemModel retval = listsDataService.editListItem(item);
 		
 		if (retval != null) {
+			// custom item was updated
 			return new ResponseEntity<>(new StatusModel("success", "Custom List item successfully updated."), HttpStatus.OK);
 		}
 		else {
+			// failed to update custom item
 			return new ResponseEntity<>(new StatusModel("error", "There was an error updating the custom list item."), HttpStatus.BAD_REQUEST);
 		}
 	}
@@ -219,12 +251,15 @@ public class ListsRESTController {
 	 */
 	@DeleteMapping("/items/{id}")
 	public ResponseEntity<?> removeListItem(@PathVariable(name="id") int id) {
+		// use DAO to delete item
 		int retval = listsDataService.deleteListItem(id);
 		
 		if (retval > 0) {
+			// item was deleted
 			return new ResponseEntity<>(new StatusModel("success", "Item successfully deleted."), HttpStatus.OK);
 		}
 		else {
+			// failed to delete item
 			return new ResponseEntity<>(new StatusModel("error", "There was an error deleting the item."), HttpStatus.BAD_REQUEST);
 		}
 	}
@@ -237,12 +272,15 @@ public class ListsRESTController {
 	 */
 	@DeleteMapping("/items/custom/{id}")
 	public ResponseEntity<?> removeCustomListItem(@PathVariable(name="id") int id) {
+		// use DAO to delete custom list item
 		int retval = listsDataService.deleteCustomListItem(id);
 		
 		if (retval > 0) {
+			// custom item was deleted
 			return new ResponseEntity<>(new StatusModel("success", "Item successfully deleted."), HttpStatus.OK);
 		}
 		else {
+			// failed to delete custom item
 			return new ResponseEntity<>(new StatusModel("error", "There was an error deleting the item."), HttpStatus.BAD_REQUEST);
 		}
 	}

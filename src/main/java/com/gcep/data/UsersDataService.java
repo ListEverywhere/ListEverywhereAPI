@@ -127,6 +127,9 @@ public class UsersDataService implements UsersDataServiceInterface {
 		return null;
 	}
 
+	/**
+	 * TODO: Remove this method
+	 */
 	@Override
 	public UserModel authenticate(String username, String password) {
 		// TODO to be implemented in a future version
@@ -138,6 +141,8 @@ public class UsersDataService implements UsersDataServiceInterface {
 		UserModel result = null;
 		
 		try {
+			// run query to get a user with the matching username
+			// used in UsersService for UserDetailsService
 			result = jdbcTemplate.queryForObject("SELECT * FROM users WHERE username=?", new UserMapper(), new Object[] {username});
 		} catch (Exception e) {
 			throw new DatabaseErrorException(e.getMessage());
