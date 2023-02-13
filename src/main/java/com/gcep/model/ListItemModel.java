@@ -23,8 +23,8 @@ public class ListItemModel extends ItemModel {
 	 * @param list_item_id The ID number of the item entry
 	 * @param list_id The ID number of the list that the item is from
 	 */
-	public ListItemModel(int item_id, String item_name, boolean checked, int list_item_id, int list_id) {
-		super(item_id, item_name, checked);
+	public ListItemModel(int item_id, String item_name, boolean checked, int position, int list_item_id, int list_id) {
+		super(item_id, item_name, checked, position);
 		this.list_item_id = list_item_id;
 		this.list_id = list_id;
 	}

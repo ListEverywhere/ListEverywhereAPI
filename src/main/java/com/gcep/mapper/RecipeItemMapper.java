@@ -22,6 +22,7 @@ public class RecipeItemMapper implements RowMapper<RecipeItemModel> {
 				rs.getInt("item_id"),
 				"Unknown",
 				false,
+				rs.getInt("position"),
 				rs.getInt("recipe_item_id"),
 				rs.getInt("recipe_id")
 				);
