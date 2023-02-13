@@ -11,6 +11,7 @@ public abstract class ItemModel {
 	int item_id;
 	String item_name;
 	boolean checked;
+	int position;
 	
 	public ItemModel() {
 		super();
@@ -22,11 +23,12 @@ public abstract class ItemModel {
 	 * @param item_name The name of the item
 	 * @param checked Represents if the user marked the item as checked (has received the item)
 	 */
-	public ItemModel(int item_id, String item_name, boolean checked) {
+	public ItemModel(int item_id, String item_name, boolean checked, int position) {
 		super();
 		this.item_id = item_id;
 		this.item_name = item_name;
 		this.checked = checked;
+		this.position = position;
 	}
 
 	public int getItemId() {
@@ -51,6 +53,14 @@ public abstract class ItemModel {
 
 	public void setChecked(boolean checked) {
 		this.checked = checked;
+	}
+	
+	public int getPosition() {
+		return this.position;
+	}
+	
+	public void setPosition(int position) {
+		this.position = position;
 	}
 	
 	

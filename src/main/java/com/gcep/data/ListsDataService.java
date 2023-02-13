@@ -83,6 +83,9 @@ public class ListsDataService implements ListsDataServiceInterface {
 			throw new DatabaseErrorException(e.getMessage());
 		}
 		
+		// sort the item list by position
+		itemList.sort((i1, i2) -> Integer.compare(i1.getPosition(), i2.getPosition()));
+		
 		// return the final item list
 		return itemList;
 	}
