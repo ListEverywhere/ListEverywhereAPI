@@ -3,6 +3,7 @@ package com.gcep.security;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -42,7 +43,7 @@ public class AppSecurityConfig {
 		http.oauth2Client();
 		
 		// configures the application endpoints
-		// all endpoints require valid JWT token except for login
+		// all endpoints require valid JWT token except for login and register
 		http.csrf().disable()
 		.authorizeRequests()
 		.antMatchers("/lists/**").authenticated()
@@ -52,6 +53,12 @@ public class AppSecurityConfig {
 		.and()
 		.authorizeRequests()
 		.antMatchers("/users/login/").permitAll()
+		.and()
+		.authorizeRequests()
+		.antMatchers(HttpMethod.POST, "/users/").permitAll()
+		.and()
+		.authorizeRequests()
+		.antMatchers("/users/**").authenticated()
 		.anyRequest().authenticated()
 		;
 		
@@ -79,6 +86,7 @@ public class AppSecurityConfig {
 	public DaoAuthenticationProvider authProvider() {
 		DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
 		
+		// set the user service and password encoder
 		authProvider.setUserDetailsService(usersService);
 		authProvider.setPasswordEncoder(passwordEncode());
 		
