@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.gcep.data.UsersDataService;
 import com.gcep.data.UsersDataServiceInterface;
 import com.gcep.model.StatusModel;
+import com.gcep.model.UserDetailsModel;
 import com.gcep.model.UserModel;
 import com.gcep.security.TokenUtility;
 
@@ -56,13 +57,13 @@ public class UsersRESTController {
 					new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
 			
 			// get UserDetails object for the current user
-			User userDetails = (User)auth.getPrincipal();
+			UserDetailsModel userDetails = (UserDetailsModel)auth.getPrincipal();
 			
 			// generate a new JWT token
 			String token = tokenUtility.generateToken(userDetails);
 			
 			// return the JWT token for the user
-			return new ResponseEntity<>(new StatusModel("token", token), HttpStatus.OK);
+			return new ResponseEntity<>(new StatusModel("token", new String[] {token, Integer.toString(userDetails.getUserId())}), HttpStatus.OK);
 		} catch (Exception e) {
 			// credentials are not valid, send error
 			return new ResponseEntity<>(new StatusModel("error", e.getMessage()), HttpStatus.BAD_REQUEST);

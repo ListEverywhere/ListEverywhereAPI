@@ -13,6 +13,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.gcep.data.UsersDataServiceInterface;
+import com.gcep.model.UserDetailsModel;
 import com.gcep.model.UserModel;
 
 /**
@@ -36,7 +37,7 @@ public class UsersService implements UserDetailsService {
 			// only role available currently is "USER"
 			List<GrantedAuthority> access = new ArrayList<GrantedAuthority>();
 			access.add(new SimpleGrantedAuthority("USER"));
-			return new User(user.getUsername(), user.getPassword(), access);
+			return new UserDetailsModel(user.getUsername(), user.getPassword(), access, user.getId());
 		}
 		else {
 			throw new UsernameNotFoundException("User not found.");
