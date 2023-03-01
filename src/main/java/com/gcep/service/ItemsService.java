@@ -106,13 +106,13 @@ public class ItemsService {
 		String tkn = apiTokenManager.getToken();
 		
 		// builds request URL and adds query parameters
-		String url = UriComponentsBuilder.fromHttpUrl(resourceUrl)
+		var uri = UriComponentsBuilder.fromHttpUrl(resourceUrl)
 				.queryParam("method", "foods.search")
 				.queryParam("search_expression", search_term)
 				.queryParam("format", "json")
 				.queryParam("max_results", 10)
-				.encode()
-				.toUriString();
+				.encode().build()
+				.toUri();
 		
 		// adds authorization header containing access token
 		HttpHeaders headers = new HttpHeaders();
@@ -120,7 +120,8 @@ public class ItemsService {
 		HttpEntity<Void> req = new HttpEntity<>(headers);
 		
 		// sends HTTP request
-		var response = restTemplate.exchange(url, HttpMethod.POST, req, String.class);
+		var response = restTemplate.exchange(uri, HttpMethod.POST, req, String.class);
+		
 		
 		// creates the object mapper instance
 		ObjectMapper mapper = new ObjectMapper();
