@@ -72,8 +72,15 @@ public class UsersDataService implements UsersDataServiceInterface {
 		
 		user.setPassword(passwordEncode.encode(user.getPassword()));
 		
-		// run query to insert a new user with the given information
+		// run query to check if username or email address exists
+		List<UserModel> existingUsers = jdbcTemplate.query("SELECT * FROM users WHERE email=? OR username=?", new UserMapper(), new Object[] {user.getEmail(), user.getUsername()});
+		if (existingUsers.size() > 0) {
+			
+			throw new DatabaseErrorException("An account already exists with this username or email address.");
+		}
+		
 		try {
+			// run query to insert a new user with the given information
 			result = jdbcTemplate.update("INSERT INTO users (first_name, last_name, email, date_of_birth, username, password) VALUES (?,?,?,?,?,?)",
 					user.getFirstName(),
 					user.getLastName(),

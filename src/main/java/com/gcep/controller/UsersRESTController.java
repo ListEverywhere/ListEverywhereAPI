@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -24,6 +26,7 @@ import com.gcep.data.UsersDataServiceInterface;
 import com.gcep.model.StatusModel;
 import com.gcep.model.UserDetailsModel;
 import com.gcep.model.UserModel;
+import com.gcep.security.TokenFilter;
 import com.gcep.security.TokenUtility;
 
 /**
@@ -70,13 +73,17 @@ public class UsersRESTController {
 		}
 	}
 	
-	/**
-	 * Test method that returns a single hard-coded user. Will be removed in a future version
-	 * @return
-	 */
-	@GetMapping("/test") 
-	public ResponseEntity<?> test() {
-		return new ResponseEntity<>(usersDataService.getUserByUsername("bobby"), HttpStatus.I_AM_A_TEAPOT);
+	
+	private UserDetailsModel getCurrentUser() {
+		return (UserDetailsModel)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+	}
+	
+	@GetMapping("/user")
+	public ResponseEntity<?> getDetailsFromToken() {
+		UserDetailsModel user = getCurrentUser();
+		
+		
+		return new ResponseEntity<>(user, HttpStatus.OK);
 	}
 	
 	/**
@@ -100,15 +107,6 @@ public class UsersRESTController {
 	}
 	
 	/**
-	 * GET method for returning a list of all users. Will be removed in a later version.
-	 * @return JSON response
-	 */
-	@GetMapping("/")
-	public ResponseEntity<?> getUsers() {
-		return new ResponseEntity<>(usersDataService.getUsers(), HttpStatus.OK);
-	}
-	
-	/**
 	 * PUT method for updating a specified user. User ID must be specified in the request body.
 	 * @param updated The updated user information
 	 * @return JSON response
@@ -116,7 +114,13 @@ public class UsersRESTController {
 	@PutMapping("/")
 	public ResponseEntity<?> updateUser(@RequestBody UserModel updated) {
 		// use DAO to update user information
-		UserModel result = usersDataService.updateUser(updated);
+		UserDetailsModel user = getCurrentUser();
+		
+		UserModel result = null;
+		
+		if (updated.getId() == user.getUserId()) {
+			result = usersDataService.updateUser(updated);
+		}
 		
 		if (result != null) {
 			// user was updated
@@ -135,8 +139,13 @@ public class UsersRESTController {
 	 */
 	@DeleteMapping("/{id}")
 	public ResponseEntity<?> deleteUser(@PathVariable(name="id") int id) {
+		UserDetailsModel user = getCurrentUser();
+		boolean result = false;
+		
+		if (user.getUserId() == id) {
+			result = usersDataService.deleteUser(id);
+		}
 		// use DAO to delete user
-		boolean result = usersDataService.deleteUser(id);
 		
 		if (result) {
 			// user was deleted
