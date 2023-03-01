@@ -20,6 +20,8 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.gcep.model.UserDetailsModel;
+
 /**
  * This class configures the filter for all requests using JWT authentication.
  * @author Gabriel Cepleanu
@@ -114,7 +116,7 @@ public class TokenFilter extends OncePerRequestFilter {
 		access.add(new SimpleGrantedAuthority("USER"));
 		
 		// Creates the user object using the information from the token
-		User user = new User(subject[0], subject[1], access);
+		UserDetailsModel user = new UserDetailsModel(subject[0], subject[1], access, Integer.parseInt(subject[2]));
 		return user;
 		
 	}

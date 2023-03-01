@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
 
+import com.gcep.model.UserDetailsModel;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
@@ -34,7 +36,7 @@ public class TokenUtility {
 	 * @param user User from UserDetailsService
 	 * @return JWT token string
 	 */
-	public String generateToken(User user) {
+	public String generateToken(UserDetailsModel user) {
 		
 		// create key using the secret
 		SecretKey key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret));
@@ -43,7 +45,7 @@ public class TokenUtility {
 		// subject contains username and password
 		// expiration uses date constant
 		// sign using the secret
-		return Jwts.builder().setSubject(String.format("%s,%s", user.getUsername(), user.getPassword()))
+		return Jwts.builder().setSubject(String.format("%s,%s,%d", user.getUsername(), user.getPassword(), user.getUserId()))
 				.setIssuer("gcep")
 				.setIssuedAt(new Date())
 				.setExpiration(new Date(System.currentTimeMillis() + EXPIRES))
