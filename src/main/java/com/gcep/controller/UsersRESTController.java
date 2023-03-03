@@ -66,7 +66,7 @@ public class UsersRESTController {
 			String token = tokenUtility.generateToken(userDetails);
 			
 			// return the JWT token for the user
-			return new ResponseEntity<>(new StatusModel("token", new String[] {token, Integer.toString(userDetails.getUserId())}), HttpStatus.OK);
+			return new ResponseEntity<>(new StatusModel("token", new String[] {token, Integer.toString(userDetails.getId())}), HttpStatus.OK);
 		} catch (Exception e) {
 			// credentials are not valid, send error
 			return new ResponseEntity<>(new StatusModel("error", e.getMessage()), HttpStatus.BAD_REQUEST);
@@ -118,7 +118,7 @@ public class UsersRESTController {
 		
 		UserModel result = null;
 		
-		if (updated.getId() == user.getUserId()) {
+		if (updated.getId() == user.getId()) {
 			result = usersDataService.updateUser(updated);
 		}
 		
@@ -142,7 +142,7 @@ public class UsersRESTController {
 		UserDetailsModel user = getCurrentUser();
 		boolean result = false;
 		
-		if (user.getUserId() == id) {
+		if (user.getId() == id) {
 			result = usersDataService.deleteUser(id);
 		}
 		// use DAO to delete user

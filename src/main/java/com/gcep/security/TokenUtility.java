@@ -45,7 +45,7 @@ public class TokenUtility {
 		// subject contains username and password
 		// expiration uses date constant
 		// sign using the secret
-		return Jwts.builder().setSubject(String.format("%s,%s,%d", user.getUsername(), user.getPassword(), user.getUserId()))
+		return Jwts.builder().setSubject(String.format("%s,%s,%d", user.getUsername(), user.getPassword(), user.getId()))
 				.setIssuer("gcep")
 				.setIssuedAt(new Date())
 				.setExpiration(new Date(System.currentTimeMillis() + EXPIRES))

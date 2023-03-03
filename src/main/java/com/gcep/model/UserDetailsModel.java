@@ -9,15 +9,15 @@ import org.springframework.security.core.userdetails.User;
 public class UserDetailsModel extends User {
 	
 	private static final long serialVersionUID = 1923527094429164656L;
-	int user_id;
+	int id;
 
-	public UserDetailsModel(String username, String password, List<GrantedAuthority> authorities, int user_id) {
+	public UserDetailsModel(String username, String password, List<GrantedAuthority> authorities, int id) {
 		super(username, password, authorities);
-		this.user_id = user_id;
+		this.id = id;
 	}
 	
-	public int getUserId() {
-		return user_id;
+	public int getId() {
+		return id;
 	}
 	
 	

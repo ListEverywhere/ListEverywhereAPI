@@ -27,6 +27,8 @@ public class AppSecurityConfig {
 	private UsersService usersService;
 	@Autowired
 	private TokenFilter tokenFilter;
+	@Autowired
+	private CustomAuthEntryPoint authEntryPoint;
 	
 	
 	/**
@@ -63,6 +65,8 @@ public class AppSecurityConfig {
 		.authorizeRequests()
 		.antMatchers("/users/**").authenticated()
 		.anyRequest().authenticated()
+		.and()
+		.exceptionHandling().authenticationEntryPoint(authEntryPoint)
 		;
 		
 		// configures the JWT token filter
