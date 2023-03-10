@@ -1,5 +1,7 @@
 package com.gcep.service;
 
+import java.time.Instant;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.client.OAuth2AuthorizeRequest;
@@ -28,6 +30,7 @@ public class ApiTokenManager {
 	private String clientId;
 	
 	private String currentToken = "";
+	private Instant tokenExpiresAt = Instant.MAX;
 
 	public ApiTokenManager(OAuth2AuthorizedClientManager clientMan) {
 		this.clientMan = clientMan;
@@ -48,6 +51,7 @@ public class ApiTokenManager {
 		OAuth2AccessToken token = client.getAccessToken();
 		
 		// get the token String value and set class variable
+		this.tokenExpiresAt = token.getExpiresAt();
 		this.currentToken = token.getTokenValue();
 		
 		// return current token
@@ -60,8 +64,8 @@ public class ApiTokenManager {
 	 * @return Access token
 	 */
 	public String getToken() {
-		// Generate a new token if there is no current token
-		if (this.currentToken.equals("")) {
+		// Generate a new token if there is no current token or token has expired
+		if (this.currentToken.equals("") || tokenExpiresAt.isBefore(Instant.now())) {
 			return this.getAccessToken();
 		}
 		return currentToken;

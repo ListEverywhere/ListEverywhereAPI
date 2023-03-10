@@ -43,6 +43,11 @@ public class ItemsService {
 	 * @return FoodItemModel object
 	 */	
 	public FoodItemModel getItem(int food_id) throws IOException {
+		// bypass get item to save on API calls - TEMP
+		
+		//if (true) return new FoodItemModel(food_id, "Service disabled");
+		
+		
 		// gets the current access token
 				String token = apiTokenManager.getToken();
 				
