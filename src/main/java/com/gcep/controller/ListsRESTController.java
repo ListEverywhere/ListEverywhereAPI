@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.gcep.data.ListsDataService;
 import com.gcep.data.ListsDataServiceInterface;
 import com.gcep.model.CustomListItemModel;
 import com.gcep.model.FoodItemModel;
@@ -36,7 +37,7 @@ import com.gcep.service.ItemsService;
 public class ListsRESTController {
 	
 	@Autowired
-	ListsDataServiceInterface listsDataService;
+	ListsDataService listsDataService;
 	@Autowired
 	ItemsService itemsService;
 	
@@ -55,6 +56,12 @@ public class ListsRESTController {
 			return new ResponseEntity<>(e, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		
+	}
+	
+	@GetMapping("/test2")
+	public ResponseEntity<?> test2() {
+		int position = listsDataService.getPositionOfNextItem(25);
+		return new ResponseEntity<>(position, HttpStatus.OK);
 	}
 	
 	/**

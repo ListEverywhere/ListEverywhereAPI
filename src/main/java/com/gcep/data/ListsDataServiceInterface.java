@@ -2,7 +2,9 @@ package com.gcep.data;
 
 import java.util.List;
 
+import com.gcep.model.CustomListItemModel;
 import com.gcep.model.ItemModel;
+import com.gcep.model.ListItemModel;
 import com.gcep.model.ListModel;
 
 /**
@@ -79,4 +81,8 @@ public interface ListsDataServiceInterface {
 	 * @return Item information
 	 */
 	public int GetItemById(int item_id);
+	
+	public ListItemModel GetListItemDetails(int list_item_id, boolean noItemsService);
+	
+	public CustomListItemModel GetCustomListItemDetails(int custom_item_id);
 }
