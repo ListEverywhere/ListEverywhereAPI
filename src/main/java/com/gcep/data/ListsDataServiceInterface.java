@@ -82,7 +82,7 @@ public interface ListsDataServiceInterface {
 	 */
 	public int GetItemById(int item_id);
 	
-	public ListItemModel GetListItemDetails(int list_item_id, boolean noItemsService);
+	public ListItemModel getListItemDetails(int list_item_id, boolean noItemsService);
 	
-	public CustomListItemModel GetCustomListItemDetails(int custom_item_id);
+	public CustomListItemModel getCustomListItemDetails(int custom_item_id);
 }

@@ -312,8 +312,16 @@ public class ListsDataService implements ListsDataServiceInterface {
 		int result = 0;
 		// run query to delete a list item
 		try {
+			ListItemModel item = getListItemDetails(id, false);
 			
-			result = jdbcTemplate.update("DELETE FROM lists_items WHERE list_item_id=?", id);
+			if (item != null) {
+				result = jdbcTemplate.update("DELETE FROM lists_items WHERE list_item_id=?", id);
+				
+				// if list items are updated successfully, return result (likely nonzero), otherwise result is 0 for failure
+				result = (updateListItemsByPosition(item.getListId(), item.getPosition())) ? result : 0;
+			}
+			
+			
 		} catch (Exception e) {
 			// an error with the database has occurred
 			throw new DatabaseErrorException();
@@ -326,7 +334,15 @@ public class ListsDataService implements ListsDataServiceInterface {
 		int result = 0;
 		// run query to remove custom list item
 		try {
-			result = jdbcTemplate.update("DELETE FROM lists_items_custom WHERE custom_item_id=?", id);
+			CustomListItemModel item = getCustomListItemDetails(id);
+			
+			if (item!= null) {
+				result = jdbcTemplate.update("DELETE FROM lists_items_custom WHERE custom_item_id=?", id);
+				
+				// if list items are updated successfully, return result (likely nonzero), otherwise result is 0 for failure
+				result = (updateListItemsByPosition(item.getListId(), item.getPosition())) ? result : 0;
+			}
+			
 		} catch (Exception e) {
 			// an error with the database has occurred
 			throw new DatabaseErrorException();
@@ -334,10 +350,20 @@ public class ListsDataService implements ListsDataServiceInterface {
 		return result;
 	}
 	
+	public boolean updateListItemsByPosition(int list_id, int startingPosition) {
+		List<ItemModel> items = getItemsFromListAfterPosition(list_id, startingPosition);
+		return updateItemPositions(startingPosition, items);
+	}
+	
 	public boolean updateItemPositions(int startingPosition, List<ItemModel> items) {
 		int result = 0;
 		
 		try {
+			
+			if (items.size() == 0) {
+				return true;
+			}
+			
 			for (int i = 0; i < items.size(); i++) {
 				ItemModel item = items.get(i);
 				
@@ -353,7 +379,7 @@ public class ListsDataService implements ListsDataServiceInterface {
 			throw new DatabaseErrorException(e.getMessage());
 		}
 		
-		return (result + 1) == items.size();
+		return result == items.size();
 	}
 	
 	public List<ItemModel> getItemsFromListAfterPosition(int list_id, int position) {
@@ -392,7 +418,7 @@ public class ListsDataService implements ListsDataServiceInterface {
 	}
 
 	@Override
-	public ListItemModel GetListItemDetails(int list_item_id, boolean noItemsService) {
+	public ListItemModel getListItemDetails(int list_item_id, boolean noItemsService) {
 		ListItemModel item = null;
 		try {
 			item = jdbcTemplate.queryForObject("SELECT * FROM lists_items WHERE list_item_id=?", new ListItemMapper(), list_item_id);
@@ -409,7 +435,7 @@ public class ListsDataService implements ListsDataServiceInterface {
 	}
 
 	@Override
-	public CustomListItemModel GetCustomListItemDetails(int custom_item_id) {
+	public CustomListItemModel getCustomListItemDetails(int custom_item_id) {
 		CustomListItemModel item = null;
 		
 		try {
