@@ -391,14 +391,9 @@ public class ListsDataService implements ListsDataServiceInterface {
 			
 			items.remove(currentItemIndex);
 			
-			if (currentItemPosition > newPosition) {
-				items.add(newPosition, item);
-			}
-			else if (currentItemPosition < newPosition) {
-				items.add(newPosition-1, item);
-			}
+			items.add(newPosition, item);
 			
-			return updateItemPositions(0, items);
+			return updateItemListPositions(0, items);
 		}
 	}
 	
@@ -476,10 +471,10 @@ public class ListsDataService implements ListsDataServiceInterface {
 	
 	public boolean updateListItemsByPosition(int list_id, int startingPosition) {
 		List<ItemModel> items = getItemsFromListAfterPosition(list_id, startingPosition);
-		return updateItemPositions(startingPosition, items);
+		return updateItemListPositions(startingPosition, items);
 	}
 	
-	public boolean updateItemPositions(int startingPosition, List<ItemModel> items) {
+	public boolean updateItemListPositions(int startingPosition, List<ItemModel> items) {
 		int result = 0;
 		
 		try {
