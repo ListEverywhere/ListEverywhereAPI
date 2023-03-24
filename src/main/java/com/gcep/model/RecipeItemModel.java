@@ -44,6 +44,11 @@ public class RecipeItemModel extends ItemModel {
 	public void setRecipeId(int recipe_id) {
 		this.recipe_id = recipe_id;
 	}
+
+	@Override
+	public int getPrimaryKey() {
+		return getRecipeItemId();
+	}
 	
 	
 	

@@ -30,6 +30,8 @@ public abstract class ItemModel {
 		this.checked = checked;
 		this.position = position;
 	}
+	
+	public abstract int getPrimaryKey();
 
 	public int getItemId() {
 		return item_id;

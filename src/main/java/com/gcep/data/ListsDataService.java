@@ -8,6 +8,8 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 import javax.sql.DataSource;
 
@@ -136,6 +138,10 @@ public class ListsDataService implements ListsDataServiceInterface {
 
 	@Override
 	public List<ListModel> getListsByUser(int user_id) {
+		return getListsByUser(user_id, false);
+	}
+	
+	public List<ListModel> getListsByUser(int user_id, boolean noItemsService) {
 		List<ListModel> lists = null;
 		try {
 			// run query to get all lists with a matching user id
@@ -143,14 +149,17 @@ public class ListsDataService implements ListsDataServiceInterface {
 					+ "INNER JOIN users_lists ON lists.list_id=users_lists.list_id WHERE users_lists.user_id=?", 
 					new ListMapper(), new Object[] {user_id});
 			
-			// populate each list with items
-			for (int i = 0; i < lists.size(); i++) {
-				var newList = lists.get(i);
-				// get the items and item information
-				newList.setListItems(getListItems(newList.getListId()));
-				// replace unpopulated list with populated list
-				lists.set(i, newList);
+			if (!noItemsService) {
+				// populate each list with items
+				for (int i = 0; i < lists.size(); i++) {
+					var newList = lists.get(i);
+					// get the items and item information
+					newList.setListItems(getListItems(newList.getListId()));
+					// replace unpopulated list with populated list
+					lists.set(i, newList);
+				}
 			}
+			
 		} catch (Exception e) {
 			// an error with the database has occurred
 			throw new DatabaseErrorException();
@@ -285,6 +294,7 @@ public class ListsDataService implements ListsDataServiceInterface {
 			// check what type of item is given so that the appropriate table is updated
 			if (updated instanceof ListItemModel) {
 				ListItemModel current = (ListItemModel) updated;
+				
 				result = jdbcTemplate.update("UPDATE lists_items SET item_id=?, checked=?, position=? WHERE list_item_id=?",
 						current.getItemId(), current.isChecked(), current.getPosition(), current.getListItemId());
 				// set retval as updated ItemModel if successful
@@ -293,6 +303,7 @@ public class ListsDataService implements ListsDataServiceInterface {
 				}
 			} else if (updated instanceof CustomListItemModel) {
 				CustomListItemModel current = (CustomListItemModel) updated;
+				
 				result = jdbcTemplate.update("UPDATE lists_items_custom SET item_name=?, checked=?, position=? WHERE custom_item_id=?",
 						current.getItemName(), current.isChecked(), current.getPosition(), current.getCustomItemId());
 				// set retval as updated ItemModel if successful
@@ -306,13 +317,126 @@ public class ListsDataService implements ListsDataServiceInterface {
 		}
 		return retval;
 	}
+	
+	private boolean editItemPosition(ItemModel item) {
+		int result = 0;
+		try {
+			if (item instanceof ListItemModel) {
+				ListItemModel current = (ListItemModel) item;
+				
+				result = jdbcTemplate.update("UPDATE lists_items SET position=? WHERE list_item_id=?", current.getPosition(), current.getListItemId());
+			} else if (item instanceof CustomListItemModel) {
+				CustomListItemModel current = (CustomListItemModel) item;
+				
+				result = jdbcTemplate.update("UPDATE lists_items_custom SET position=? WHERE custom_item_id=?", current.getPosition(), current.getCustomItemId());
+			}
+		} catch (Exception e) {
+			throw new DatabaseErrorException(e.getMessage());
+		}
+		
+		return result > 0;
+	}
+	
+	public boolean updateItemPositions(ItemModel item, int list_id, int newPosition, boolean swap) {
+		// check if newPosition is valid
+		
+		if (!isValidPosition(list_id, newPosition)) {
+			throw new DatabaseErrorException("Invalid list item position.");
+		}
+		
+		// if swap
+		if (swap) {
+			// SWAP
+			
+			// get old item at position
+			Optional<ItemModel> oldItem = getListItems(list_id, true).stream().filter(e -> e.getPosition() == newPosition).findFirst();
+			
+			// if old item does not exist, return false
+			if (oldItem.isEmpty()) {
+				return false;
+			}
+			
+			// set old item position to item position
+			ItemModel oldItemModel = oldItem.get();
+			oldItemModel.setPosition(item.getPosition());
+			
+			// update old item
+			boolean firstResult = editItemPosition(oldItemModel);
+			
+			// set item position to newPosition
+			item.setPosition(newPosition);
+			
+			// update item
+			boolean secondResult = editItemPosition(item);
+			
+			return firstResult && secondResult;
+			
+		} else {
+			// else
+			// ALL ITEMS AFTER
+			
+			List<ItemModel> items = getListItems(list_id, true);
+			
+			int currentItemPosition = -1;
+			int currentItemIndex = -1;
+			
+			for (int i = 0; i < items.size(); i++) {
+				if (items.get(i).getClass() == item.getClass() && items.get(i).getPrimaryKey() == item.getPrimaryKey()) {
+					System.out.println("Found our item");
+					currentItemPosition = items.get(i).getPosition();
+					currentItemIndex = i;
+					break;
+				}
+			}
+			
+			items.remove(currentItemIndex);
+			
+			if (currentItemPosition > newPosition) {
+				items.add(newPosition, item);
+			}
+			else if (currentItemPosition < newPosition) {
+				items.add(newPosition-1, item);
+			}
+			
+			return updateItemPositions(0, items);
+		}
+	}
+	
+	private boolean isValidPosition(int list_id, int position) {
+		// any position less than 0 is invalid
+		if (position < 0) {
+			return false;
+		}
+		
+		// get items from list
+		List<ItemModel> items = getListItems(list_id, true);
+		
+		// use stream to get item that matches position provided
+		Optional<ItemModel> existingItem = items.stream().filter(e -> e.getPosition() == position).findFirst();
+		
+		// since another item has this position, it is likely also a valid position
+		// may only be an issue if an item is given an invalid position beforehand
+		if (existingItem.isPresent()) {
+			return true;
+		}
+		
+		// use stream again to get an item that has a position before the given position
+		existingItem = items.stream().filter(e -> e.getPosition() == position - 1).findFirst();
+		
+		// if an item exists at this position, it is valid unless it is the same item
+		if (existingItem.isPresent()) {
+			return true;
+		}
+		
+		return false;
+	}
 
 	@Override
 	public int deleteListItem(int id) {
 		int result = 0;
 		// run query to delete a list item
 		try {
-			ListItemModel item = getListItemDetails(id, false);
+			ListItemModel item = getListItemDetails(id, true);
 			
 			if (item != null) {
 				result = jdbcTemplate.update("DELETE FROM lists_items WHERE list_item_id=?", id);
@@ -369,9 +493,9 @@ public class ListsDataService implements ListsDataServiceInterface {
 				
 				item.setPosition(startingPosition+i);
 				
-				item = editListItem(item);
+				boolean editResult = editItemPosition(item);
 				
-				if (item != null) {
+				if (editResult) {
 					result++;
 				}
 			}

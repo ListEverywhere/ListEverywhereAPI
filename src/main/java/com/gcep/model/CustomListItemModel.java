@@ -44,6 +44,11 @@ public class CustomListItemModel extends ItemModel {
 	public void setListId(int list_id) {
 		this.list_id = list_id;
 	}
+
+	@Override
+	public int getPrimaryKey() {
+		return custom_item_id;
+	}
 	
 	
 	
