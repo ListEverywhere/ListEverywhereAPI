@@ -23,8 +23,8 @@ public class RecipeItemModel extends ItemModel {
 	 * @param recipe_item_id The ID number of the recipe item entry
 	 * @param recipe_id The ID number of the recipe that the item is from
 	 */
-	public RecipeItemModel(int item_id, String item_name, boolean checked, int recipe_item_id, int recipe_id) {
-		super(item_id, item_name, checked);
+	public RecipeItemModel(int item_id, String item_name, boolean checked, int position, int recipe_item_id, int recipe_id) {
+		super(item_id, item_name, checked, position);
 		this.recipe_item_id = recipe_item_id;
 		this.recipe_id = recipe_id;
 	}
@@ -43,6 +43,11 @@ public class RecipeItemModel extends ItemModel {
 
 	public void setRecipeId(int recipe_id) {
 		this.recipe_id = recipe_id;
+	}
+
+	@Override
+	public int getPrimaryKey() {
+		return getRecipeItemId();
 	}
 	
 	

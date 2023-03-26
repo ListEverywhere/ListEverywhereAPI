@@ -20,6 +20,7 @@ public class CustomListItemMapper implements RowMapper<CustomListItemModel> {
 		return new CustomListItemModel(-1,
 				rs.getString("item_name"),
 				rs.getBoolean("checked"),
+				rs.getInt("position"),
 				rs.getInt("custom_item_id"),
 				rs.getInt("list_id"));
 	}

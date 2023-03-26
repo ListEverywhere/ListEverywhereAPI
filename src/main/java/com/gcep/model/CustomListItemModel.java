@@ -23,8 +23,8 @@ public class CustomListItemModel extends ItemModel {
 	 * @param custom_item_id The ID number of the custom item entry
 	 * @param list_id The ID number of the list that the item is from
 	 */
-	public CustomListItemModel(int item_id, String item_name, boolean checked, int custom_item_id, int list_id) {
-		super(item_id, item_name, checked);
+	public CustomListItemModel(int item_id, String item_name, boolean checked, int position, int custom_item_id, int list_id) {
+		super(item_id, item_name, checked, position);
 		this.custom_item_id = custom_item_id;
 		this.list_id = list_id;
 	}
@@ -43,6 +43,11 @@ public class CustomListItemModel extends ItemModel {
 
 	public void setListId(int list_id) {
 		this.list_id = list_id;
+	}
+
+	@Override
+	public int getPrimaryKey() {
+		return custom_item_id;
 	}
 	
 	

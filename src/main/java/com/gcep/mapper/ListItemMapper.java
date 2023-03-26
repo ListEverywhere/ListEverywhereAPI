@@ -20,6 +20,7 @@ public class ListItemMapper implements RowMapper<ListItemModel> {
 		return new ListItemModel(rs.getInt("item_id"),
 				"Unknown",
 				rs.getBoolean("checked"),
+				rs.getInt("position"),
 				rs.getInt("list_item_id"),
 				rs.getInt("list_id"));
 	}
