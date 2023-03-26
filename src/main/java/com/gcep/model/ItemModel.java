@@ -22,6 +22,7 @@ public abstract class ItemModel {
 	 * @param item_id The ID number of the item
 	 * @param item_name The name of the item
 	 * @param checked Represents if the user marked the item as checked (has received the item)
+	 * @param position The position of the item in a shopping list
 	 */
 	public ItemModel(int item_id, String item_name, boolean checked, int position) {
 		super();
@@ -31,6 +32,11 @@ public abstract class ItemModel {
 		this.position = position;
 	}
 	
+	/**
+	 * Returns the ID of the item entry in the database.
+	 * Example: ListItemModel should return list_item_id as the primary key
+	 * @return Item entry ID
+	 */
 	public abstract int getPrimaryKey();
 
 	public int getItemId() {

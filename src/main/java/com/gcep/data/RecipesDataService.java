@@ -34,7 +34,7 @@ import com.gcep.service.ItemsService;
 /**
  * Provides the necessary operations for recipe information.
  * @author Gabriel Cepleanu
- * @version 0.1
+ * @version 0.2
  *
  */
 @Repository
@@ -101,10 +101,21 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 	
 	/**
 	 * Takes a list of Recipe Model objects and sets the Recipe Steps and Recipe Items list properties for each Recipe object.
-	 * @param recipes The list of Recipe objects
-	 * @return Updated list of Recipe Objects
+	 * Automatically includes recipe items with object
+	 * @param recipes
+	 * @return
 	 */
 	private List<RecipeModel> addStepsItemsToRecipeList(List<RecipeModel> recipes) {
+		return addStepsItemsToRecipeList(recipes, false);
+	}
+	
+	/**
+	 * Takes a list of Recipe Model objects and sets the Recipe Steps and Recipe Items list properties for each Recipe object.
+	 * @param recipes The list of Recipe objects
+	 * @param noItems Gets the recipe object without items
+	 * @return Updated list of Recipe Objects
+	 */
+	private List<RecipeModel> addStepsItemsToRecipeList(List<RecipeModel> recipes, boolean noItems) {
 		List<RecipeModel> retval = new ArrayList<RecipeModel>();
 		
 		// for each recipe, populate items and steps
@@ -114,7 +125,10 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 			// get the steps
 			recipe.setRecipeSteps(getRecipeSteps(recipe));
 			// get the items
-			recipe.setRecipeItems(getRecipeItems(recipe));
+			if (!noItems) {
+				recipe.setRecipeItems(getRecipeItems(recipe));
+			}
+			
 			retval.add(recipe);
 		}
 		
@@ -145,6 +159,17 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 
 	@Override
 	public List<RecipeModel> getRecipesByUser(int user_id) {
+		// automatically enable items service
+		return getRecipesByUser(user_id, false);
+	}
+	
+	/**
+	 * Returns a list of recipes from a given User ID.
+	 * @param user_id The ID number of the user
+	 * @param noItems If true, returns recipe object without items
+	 * @return List of Recipe objects
+	 */
+	public List<RecipeModel> getRecipesByUser(int user_id, boolean noItems) {
 		List<RecipeModel> recipes = null;
 		
 		try {
@@ -152,7 +177,7 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 			var recipesInit = jdbc.query("SELECT recipes.*, users_recipes.user_id, users_recipes.recipe_id FROM recipes "
 					+ "INNER JOIN users_recipes ON recipes.recipe_id=users_recipes.recipe_id WHERE users_recipes.user_id=?", new RecipeMapper(), new Object[] {user_id});
 			// populate items and steps for each recipe
-			recipes = addStepsItemsToRecipeList(recipesInit);
+			recipes = addStepsItemsToRecipeList(recipesInit, noItems);
 		} catch (Exception e) {
 			throw new DatabaseErrorException();
 		}
@@ -161,6 +186,17 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 
 	@Override
 	public List<RecipeModel> getRecipesByCategory(int category) {
+		// automatically enable items service
+		return getRecipesByCategory(category, false);
+	}
+		
+	/**
+	 * Returns a list of recipes from a given category ID.
+	 * @param category The ID number of the category.
+	 * @param noItems If true, returns recipe object without items
+	 * @return List of Recipe objects
+	 */
+	public List<RecipeModel> getRecipesByCategory(int category, boolean noItems) {
 		List<RecipeModel> recipes = null;
 		
 		try {
@@ -169,7 +205,7 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 					+ "INNER JOIN categories ON recipes.category=categories.category_id "
 					+ "INNER JOIN users_recipes ON users_recipes.recipe_id=recipes.recipe_id WHERE category_id=?", new RecipeMapper(), new Object[] {category});
 			// populate items and steps for each recipe
-			recipes = addStepsItemsToRecipeList(recipesInit);
+			recipes = addStepsItemsToRecipeList(recipesInit, noItems);
 		} catch (Exception e) {
 			throw new DatabaseErrorException();
 		}

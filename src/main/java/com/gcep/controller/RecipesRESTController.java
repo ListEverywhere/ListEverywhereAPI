@@ -13,8 +13,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.gcep.data.RecipesDataService;
 import com.gcep.data.RecipesDataServiceInterface;
 import com.gcep.model.CategoryModel;
 import com.gcep.model.RecipeItemModel;
@@ -34,7 +36,7 @@ import com.gcep.model.StatusModel;
 public class RecipesRESTController {
 	
 	@Autowired
-	RecipesDataServiceInterface recipesDataService;
+	RecipesDataService recipesDataService;
 	
 	/**
 	 * Returns a recipe with the given recipe ID
@@ -63,9 +65,9 @@ public class RecipesRESTController {
 	 * @return JSON response
 	 */
 	@GetMapping("/categories/{id}")
-	public ResponseEntity<?> getRecipesByCategory(@PathVariable(name="id") int id) {
+	public ResponseEntity<?> getRecipesByCategory(@PathVariable(name="id") int id, @RequestParam(defaultValue="false") boolean noItems) {
 		// use DAO to return list of recipes with category id
-		List<RecipeModel> recipes = recipesDataService.getRecipesByCategory(id);
+		List<RecipeModel> recipes = recipesDataService.getRecipesByCategory(id, noItems);
 		
 		if (recipes != null && recipes.size() > 0) {
 			// list of recipes is more than 0
@@ -83,9 +85,9 @@ public class RecipesRESTController {
 	 * @return JSON response
 	 */
 	@GetMapping("/user/{id}")
-	public ResponseEntity<?> getRecipesByUserId(@PathVariable(name="id") int id) {
+	public ResponseEntity<?> getRecipesByUserId(@PathVariable(name="id") int id, @RequestParam(defaultValue="false") boolean noItems) {
 		// use DAO to return list of recipes by user id
-		List<RecipeModel> recipes = recipesDataService.getRecipesByUser(id);
+		List<RecipeModel> recipes = recipesDataService.getRecipesByUser(id, noItems);
 		
 		if (recipes != null && recipes.size() > 0) {
 			// list of recipes is more than 0

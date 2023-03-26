@@ -43,29 +43,6 @@ public class ListsRESTController {
 	ItemsService itemsService;
 	
 	/**
-	 * Test method for searching for items using the ItemsService. Will be removed in the future.
-	 * @param search_term
-	 * @return
-	 */
-	@GetMapping("/test/{search_term}")
-	public ResponseEntity<?> test(@PathVariable(name="search_term") String search_term) {
-		List<FoodItemModel> items = null;
-		try {
-			items = itemsService.searchItems(search_term);
-			return new ResponseEntity<>(items,HttpStatus.OK);
-		} catch (Exception e) {
-			return new ResponseEntity<>(e, HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-		
-	}
-	
-	@GetMapping("/test2")
-	public ResponseEntity<?> test2() {
-		int position = listsDataService.getPositionOfNextItem(25);
-		return new ResponseEntity<>(position, HttpStatus.OK);
-	}
-	
-	/**
 	 * GET method for getting a list with the given list ID
 	 * @param id The ID of the list
 	 * @return JSON response

@@ -10,7 +10,7 @@ import com.gcep.model.ListModel;
 /**
  * Provides the outline of methods for various operations performed with shopping list data.
  * @author Gabriel Cepleanu
- * @version 0.1
+ * @version 0.2
  *
  */
 public interface ListsDataServiceInterface {
@@ -82,7 +82,18 @@ public interface ListsDataServiceInterface {
 	 */
 	public int GetItemById(int item_id);
 	
+	/**
+	 * Gets a single list item information with the specified ID
+	 * @param list_item_id ID number of the list item entry
+	 * @param noItemsService If true, disable getting the item name
+	 * @return List Item object
+	 */
 	public ListItemModel getListItemDetails(int list_item_id, boolean noItemsService);
 	
+	/**
+	 * Gets a single custom list item information with the specified ID
+	 * @param custom_item_id ID number of the custom list item entry
+	 * @return Custom List Item object
+	 */
 	public CustomListItemModel getCustomListItemDetails(int custom_item_id);
 }

@@ -35,7 +35,7 @@ import com.gcep.service.ItemsService;
 /**
  * Provides the necessary operations for shopping list information.
  * @author Gabriel Cepleanu
- * @version 0.1
+ * @version 0.2
  *
  */
 @Repository
@@ -138,9 +138,16 @@ public class ListsDataService implements ListsDataServiceInterface {
 
 	@Override
 	public List<ListModel> getListsByUser(int user_id) {
+		// automatically enable items service
 		return getListsByUser(user_id, false);
 	}
 	
+	/**
+	 * Returns a list of all shopping list items by User ID.
+	 * @param user_id User ID number
+	 * @param noItemsService If true, the list will not contain items
+	 * @return List of Shopping Lists
+	 */
 	public List<ListModel> getListsByUser(int user_id, boolean noItemsService) {
 		List<ListModel> lists = null;
 		try {
@@ -149,6 +156,7 @@ public class ListsDataService implements ListsDataServiceInterface {
 					+ "INNER JOIN users_lists ON lists.list_id=users_lists.list_id WHERE users_lists.user_id=?", 
 					new ListMapper(), new Object[] {user_id});
 			
+			// if true, skip getting items
 			if (!noItemsService) {
 				// populate each list with items
 				for (int i = 0; i < lists.size(); i++) {
@@ -267,6 +275,11 @@ public class ListsDataService implements ListsDataServiceInterface {
 		return result;
 	}
 	
+	/**
+	 * Returns the next available item position in a given list
+	 * @param list_id List ID
+	 * @return Next available position
+	 */
 	public int getPositionOfNextItem(int list_id) {
 		int result = -1;
 		
@@ -318,29 +331,48 @@ public class ListsDataService implements ListsDataServiceInterface {
 		return retval;
 	}
 	
+	/**
+	 * Updates only the position field of a list item.
+	 * @param item List/Custom item to update
+	 * @return Transaction status
+	 */
 	private boolean editItemPosition(ItemModel item) {
 		int result = 0;
 		try {
+			// check the type of item
 			if (item instanceof ListItemModel) {
 				ListItemModel current = (ListItemModel) item;
 				
+				// run query to update position field
 				result = jdbcTemplate.update("UPDATE lists_items SET position=? WHERE list_item_id=?", current.getPosition(), current.getListItemId());
 			} else if (item instanceof CustomListItemModel) {
 				CustomListItemModel current = (CustomListItemModel) item;
 				
+				// run query to update position field
 				result = jdbcTemplate.update("UPDATE lists_items_custom SET position=? WHERE custom_item_id=?", current.getPosition(), current.getCustomItemId());
 			}
 		} catch (Exception e) {
+			// an error with the database has occured
 			throw new DatabaseErrorException(e.getMessage());
 		}
 		
 		return result > 0;
 	}
 	
+	/**
+	 * Updates each item position in a given list of item objects
+	 * The given item will be inserted at newPosition and each item position will be updated sequentially by 1
+	 * @param item Item to be updated
+	 * @param list_id List ID to be updated
+	 * @param newPosition New position to insert item at
+	 * @param swap If enabled, performs swap with item at newPosition instead of insert
+	 * @return Transaction status
+	 */
 	public boolean updateItemPositions(ItemModel item, int list_id, int newPosition, boolean swap) {
 		// check if newPosition is valid
 		
 		if (!isValidPosition(list_id, newPosition)) {
+			// position is not valid
 			throw new DatabaseErrorException("Invalid list item position.");
 		}
 		
@@ -375,28 +407,44 @@ public class ListsDataService implements ListsDataServiceInterface {
 			// else
 			// ALL ITEMS AFTER
 			
+			// get the items from the list
 			List<ItemModel> items = getListItems(list_id, true);
 			
 			int currentItemPosition = -1;
 			int currentItemIndex = -1;
 			
+			// loop through each item and find the current item that is being moved
 			for (int i = 0; i < items.size(); i++) {
+				// check if we found the right item
+				// if the class is the same type (ListItemModel or CustomListItemModel) and the ID is the same
 				if (items.get(i).getClass() == item.getClass() && items.get(i).getPrimaryKey() == item.getPrimaryKey()) {
-					System.out.println("Found our item");
+					// item is found
 					currentItemPosition = items.get(i).getPosition();
 					currentItemIndex = i;
 					break;
 				}
 			}
 			
+			// remove the item from the old position
 			items.remove(currentItemIndex);
 			
+			// add the item to the new position
 			items.add(newPosition, item);
 			
+			// update the list item positions
 			return updateItemListPositions(0, items);
 		}
 	}
 	
+	/**
+	 * Checks if a given position in a list is a valid position.
+	 * A valid position is a position that is greater than 0 AND,
+	 * is currently used by another item OR
+	 * is the next available position
+	 * @param list_id List ID to be checked
+	 * @param position Position to be checked
+	 * @return Position is valid
+	 */
 	private boolean isValidPosition(int list_id, int position) {
 		// any position less than 0 is invalid
 		if (position < 0) {
@@ -469,38 +517,64 @@ public class ListsDataService implements ListsDataServiceInterface {
 		return result;
 	}
 	
+	/**
+	 * Updates all list items after a given position in a given list
+	 * @param list_id ID of the list to be updated
+	 * @param startingPosition Starting position for list items
+	 * @return Transaction status
+	 */
 	public boolean updateListItemsByPosition(int list_id, int startingPosition) {
 		List<ItemModel> items = getItemsFromListAfterPosition(list_id, startingPosition);
 		return updateItemListPositions(startingPosition, items);
 	}
 	
-	public boolean updateItemListPositions(int startingPosition, List<ItemModel> items) {
+	/**
+	 * Updates item positions sequentially by one given a position and a list of item objects
+	 * @param startingPosition Position for starting item
+	 * @param items Items to be updated
+	 * @return Transaction status
+	 */
+	private boolean updateItemListPositions(int startingPosition, List<ItemModel> items) {
 		int result = 0;
 		
 		try {
 			
+			// if no items, skip remaining logic
 			if (items.size() == 0) {
 				return true;
 			}
 			
+			// loop through each item to update its position
 			for (int i = 0; i < items.size(); i++) {
+				// get the item from the list of items
 				ItemModel item = items.get(i);
 				
+				// set position to start + the current index (next position)
 				item.setPosition(startingPosition+i);
 				
+				// update the position in the database
 				boolean editResult = editItemPosition(item);
 				
+				// if successful, update result count by 1
 				if (editResult) {
 					result++;
 				}
 			}
 		} catch (Exception e) {
+			// an error with the database has occured
 			throw new DatabaseErrorException(e.getMessage());
 		}
 		
+		// return true if every item was successfully updated
 		return result == items.size();
 	}
 	
+	/**
+	 * Returns a list of item objects after a given position from a list
+	 * @param list_id ID number of the list
+	 * @param position Starting position
+	 * @return List of item objects
+	 */
 	public List<ItemModel> getItemsFromListAfterPosition(int list_id, int position) {
 		List<ItemModel> items = null;
 		
@@ -512,6 +586,7 @@ public class ListsDataService implements ListsDataServiceInterface {
 			items.removeIf(e -> e.getPosition() <= position);
 			
 		} catch (Exception e) {
+			// an error with the database has occurred
 			throw new DatabaseErrorException(e.getMessage());
 		}
 		
@@ -540,13 +615,17 @@ public class ListsDataService implements ListsDataServiceInterface {
 	public ListItemModel getListItemDetails(int list_item_id, boolean noItemsService) {
 		ListItemModel item = null;
 		try {
+			// get the item
 			item = jdbcTemplate.queryForObject("SELECT * FROM lists_items WHERE list_item_id=?", new ListItemMapper(), list_item_id);
 			
+			// if noItemsService is true, skip getting item name
 			if (!noItemsService) {
+				// use items service to get item name
 				FoodItemModel foodItem = itemsService.getItem(item.getItemId());
 				item.setItemName(foodItem.getFood_name());
 			}
 		} catch (Exception e) {
+			// an error with the database has occurred
 			throw new DatabaseErrorException(e.getMessage());
 		}
 		
@@ -558,8 +637,10 @@ public class ListsDataService implements ListsDataServiceInterface {
 		CustomListItemModel item = null;
 		
 		try {
+			// get the custom item
 			item = jdbcTemplate.queryForObject("SELECT * FROM lists_items_custom WHERE custom_item_id=?", new CustomListItemMapper(), custom_item_id);
 		} catch (Exception e) {
+			// an error with the database has occurred
 			throw new DatabaseErrorException(e.getMessage());
 		}
 		return item;
