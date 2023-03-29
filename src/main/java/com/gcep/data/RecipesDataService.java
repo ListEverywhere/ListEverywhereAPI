@@ -225,10 +225,11 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 
 						@Override
 						public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
-							PreparedStatement ps = con.prepareStatement("INSERT INTO recipes (category, recipe_name, recipe_description) VALUES (?,?,?)", Statement.RETURN_GENERATED_KEYS);
+							PreparedStatement ps = con.prepareStatement("INSERT INTO recipes (category, recipe_name, recipe_description, cook_time) VALUES (?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
 							ps.setInt(1, recipe.getCategory());
 							ps.setString(2, recipe.getRecipeName());
 							ps.setString(3, recipe.getRecipeDescription());
+							ps.setInt(4, recipe.getCookTime());
 							return ps;
 						}
 						
@@ -254,8 +255,8 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 		RecipeModel recipe = null;
 		try {
 			// run query to update recipe information
-			int result = jdbc.update("UPDATE recipes SET category=?, recipe_name=?, recipe_description=? WHERE recipe_id=?",
-					updated.getCategory(), updated.getRecipeName(), updated.getRecipeDescription(), updated.getRecipeId());
+			int result = jdbc.update("UPDATE recipes SET category=?, recipe_name=?, recipe_description=?, cook_time=? WHERE recipe_id=?",
+					updated.getCategory(), updated.getRecipeName(), updated.getRecipeDescription(), updated.getCookTime(), updated.getRecipeId());
 			
 			if (result > 0) {
 				// recipe was updated, make variable not null

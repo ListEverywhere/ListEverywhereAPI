@@ -24,6 +24,7 @@ public class RecipeMapper implements RowMapper<RecipeModel> {
 				rs.getInt("category"),
 				rs.getString("recipe_name"),
 				rs.getString("recipe_description"),
+				rs.getInt("cook_time"),
 				null,
 				null,
 				false,

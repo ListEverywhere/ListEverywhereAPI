@@ -14,6 +14,7 @@ public class RecipeModel {
 	private int category;
 	private String recipe_name;
 	private String recipe_description;
+	private int cook_time;
 	private List<RecipeItemModel> recipe_items;
 	private List<RecipeStepModel> recipe_steps;
 	private boolean published;
@@ -29,18 +30,20 @@ public class RecipeModel {
 	 * @param category The ID number of the category
 	 * @param recipe_name The name of the recipe
 	 * @param recipe_description The description of the recipe
+	 * @param cook_time The cook time for the recipe
 	 * @param recipe_items List of Recipe Item objects
 	 * @param recipe_steps List of Recipe Step objects
 	 * @param published If the recipe is published
 	 * @param user_id The ID number of the user that owns the recipe
 	 */
-	public RecipeModel(int recipe_id, int category, String recipe_name, String recipe_description,
+	public RecipeModel(int recipe_id, int category, String recipe_name, String recipe_description, int cook_time,
 			List<RecipeItemModel> recipe_items, List<RecipeStepModel> recipe_steps, boolean published, int user_id) {
 		super();
 		this.recipe_id = recipe_id;
 		this.category = category;
 		this.recipe_name = recipe_name;
 		this.recipe_description = recipe_description;
+		this.cook_time = cook_time;
 		this.recipe_items = recipe_items;
 		this.recipe_steps = recipe_steps;
 		this.published = published;
@@ -109,6 +112,14 @@ public class RecipeModel {
 
 	public void setUserId(int user_id) {
 		this.user_id = user_id;
+	}
+
+	public int getCookTime() {
+		return cook_time;
+	}
+
+	public void setCookTime(int cook_time) {
+		this.cook_time = cook_time;
 	}
 	
 	
