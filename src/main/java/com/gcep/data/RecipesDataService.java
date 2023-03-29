@@ -435,7 +435,7 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 			break;
 		}
 		default:
-			throw new IllegalArgumentException("Unexpected value: " + search.getSearchType());
+			throw new IllegalArgumentException("Invalid search type: " + search.getSearchType() + ". Type can only be contains, starts, or ends");
 		}
 		
 		try {

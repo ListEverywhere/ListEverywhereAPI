@@ -104,8 +104,15 @@ public class RecipesRESTController {
 	
 	@GetMapping("/search")
 	public ResponseEntity<?> searchRecipesByName(@RequestBody @Valid SearchModel search) {
-		// use DAO to search for recipes
-		List<RecipeModel> foundRecipes = recipesDataService.searchRecipesByName(search);
+		List<RecipeModel> foundRecipes = null;
+		
+		try {
+			// use DAO to search for recipes
+			foundRecipes = recipesDataService.searchRecipesByName(search);
+		} catch (IllegalArgumentException e) {
+			// user sent invalid search type
+			return new ResponseEntity<>(new StatusModel("error", e.getMessage()), HttpStatus.BAD_REQUEST);
+		}
 		
 		if (foundRecipes != null) {
 			if (foundRecipes.size() > 0) {
