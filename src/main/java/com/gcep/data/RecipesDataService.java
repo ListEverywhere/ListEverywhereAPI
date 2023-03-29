@@ -29,6 +29,7 @@ import com.gcep.model.FoodItemModel;
 import com.gcep.model.RecipeItemModel;
 import com.gcep.model.RecipeModel;
 import com.gcep.model.RecipeStepModel;
+import com.gcep.model.SearchModel;
 import com.gcep.service.ItemsService;
 
 /**
@@ -412,6 +413,48 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 			throw new DatabaseErrorException(e.getMessage());
 		}
 		return result;
+	}
+
+	@Override
+	public List<RecipeModel> searchRecipesByName(SearchModel search) {
+		List<RecipeModel> retval = null;
+		String preparedSearch = "";
+		
+		// check the search type and update preparedSearch with appropriate wildcards
+		switch (search.getSearchType()) {
+		case "contains": {
+			preparedSearch = "%" + search.getSearch() + "%"; 
+			break;
+		}
+		case "starts": {
+			preparedSearch = search.getSearch() + "%";
+			break;
+		}
+		case "ends": {
+			preparedSearch = "%" + search.getSearch();
+			break;
+		}
+		default:
+			throw new IllegalArgumentException("Unexpected value: " + search.getSearchType());
+		}
+		
+		try {
+			// run query to get recipes where recipe name matches preparedSearch
+			retval = jdbc.query("SELECT recipes.*, users_recipes.user_id, users_recipes.recipe_id FROM recipes "
+					+ "INNER JOIN users_recipes ON recipes.recipe_id=users_recipes.recipe_id WHERE recipe_name LIKE ?", new RecipeMapper(), new Object[] {preparedSearch});
+			
+		} catch (Exception e) {
+			// an error occurred with the database
+			throw new DatabaseErrorException(e.getMessage());
+		}
+		
+		return retval;
+	}
+
+	@Override
+	public List<RecipeModel> searchRecipesByListItems(int[] list_item_ids) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

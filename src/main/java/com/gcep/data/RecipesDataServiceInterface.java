@@ -5,6 +5,7 @@ import com.gcep.model.CategoryModel;
 import com.gcep.model.RecipeItemModel;
 import com.gcep.model.RecipeModel;
 import com.gcep.model.RecipeStepModel;
+import com.gcep.model.SearchModel;
 
 /**
  * Provides the outline of methods for various operations performed with recipes data.
@@ -95,7 +96,7 @@ public interface RecipesDataServiceInterface {
 	/**
 	 * Updates an existing recipe item entry
 	 * @param updated The updated recipe item information
-	 * @return SThe given RecipeItemModel object if successful, otherwise null
+	 * @return The given RecipeItemModel object if successful, otherwise null
 	 */
 	public RecipeItemModel updateRecipeItem(RecipeItemModel updated);
 /**
@@ -104,5 +105,21 @@ public interface RecipesDataServiceInterface {
  * @return Status (1 if successful)
  */
 	public int deleteRecipeItem(int id);
+	
+	/**
+	 * Returns a list of recipes with a name matching the search term.
+	 * If search type is not specified, search defaults to contains
+	 * @param search Search query
+	 * @return List of Recipe objects
+	 */
+	public List<RecipeModel> searchRecipesByName(SearchModel search);
+	
+	/**
+	 * Returns a list of recipes that contain the item ids from list_item_ids. Custom items are not supported.
+	 * list_item_ids should contain the primary keys for list items
+	 * @param list_item_ids The ID numbers of list item entries
+	 * @return List of Recipe objects
+	 */
+	public List<RecipeModel> searchRecipesByListItems(int[] list_item_ids);
 
 }

@@ -2,6 +2,8 @@ package com.gcep.controller;
 
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +24,7 @@ import com.gcep.model.CategoryModel;
 import com.gcep.model.RecipeItemModel;
 import com.gcep.model.RecipeModel;
 import com.gcep.model.RecipeStepModel;
+import com.gcep.model.SearchModel;
 import com.gcep.model.StatusModel;
 
 /**
@@ -97,6 +100,24 @@ public class RecipesRESTController {
 			// no recipes found
 			return new ResponseEntity<>(new StatusModel("error", "Recipes not found"), HttpStatus.NOT_FOUND);
 		}
+	}
+	
+	@GetMapping("/search")
+	public ResponseEntity<?> searchRecipesByName(@RequestBody @Valid SearchModel search) {
+		// use DAO to search for recipes
+		List<RecipeModel> foundRecipes = recipesDataService.searchRecipesByName(search);
+		
+		if (foundRecipes != null) {
+			if (foundRecipes.size() > 0) {
+				// successfully found recipes
+				return new ResponseEntity<>(foundRecipes, HttpStatus.OK);
+			}
+			// no error with DAO, but no recipes were found
+			return new ResponseEntity<>(new StatusModel("error", "No recipes found."), HttpStatus.NOT_FOUND);
+		}
+		
+		// error occurred finding recipes
+		return new ResponseEntity<>(new StatusModel("error", "Failed to search recipes."), HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 	
 	/**

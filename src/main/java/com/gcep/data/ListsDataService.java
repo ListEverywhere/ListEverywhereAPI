@@ -646,4 +646,10 @@ public class ListsDataService implements ListsDataServiceInterface {
 		return item;
 	}
 
+	@Override
+	public int mergeRecipeItemsWithList(int list_id, int recipe_id) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
 }
