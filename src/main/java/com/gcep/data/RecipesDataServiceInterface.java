@@ -120,6 +120,6 @@ public interface RecipesDataServiceInterface {
 	 * @param list_item_ids The ID numbers of list item entries
 	 * @return List of Recipe objects
 	 */
-	public List<RecipeModel> searchRecipesByListItems(int[] list_item_ids);
+	public List<RecipeModel> searchRecipesByListItems(List<Integer> list_item_ids);
 
 }

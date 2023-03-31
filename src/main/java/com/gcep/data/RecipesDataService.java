@@ -6,6 +6,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.sql.DataSource;
 
@@ -26,6 +28,7 @@ import com.gcep.mapper.RecipeMapper;
 import com.gcep.mapper.RecipeStepMapper;
 import com.gcep.model.CategoryModel;
 import com.gcep.model.FoodItemModel;
+import com.gcep.model.ListItemModel;
 import com.gcep.model.RecipeItemModel;
 import com.gcep.model.RecipeModel;
 import com.gcep.model.RecipeStepModel;
@@ -47,6 +50,8 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 	
 	@Autowired
 	private ItemsService itemsService;
+	@Autowired
+	private ListsDataService listsDataService;
 	
 	public RecipesDataService(DataSource ds) {
 		this.dataSource = ds;
@@ -452,9 +457,41 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 	}
 
 	@Override
-	public List<RecipeModel> searchRecipesByListItems(int[] list_item_ids) {
-		// TODO Auto-generated method stub
-		return null;
+	public List<RecipeModel> searchRecipesByListItems(List<Integer> list_item_ids) {
+		List<ListItemModel> listItems = null;
+		// get list items by mapping list_item_ids to function that gets list item details
+		try {
+			listItems = list_item_ids.stream().map(item -> listsDataService.getListItemDetails(item, true)).toList();
+		} catch (Exception e) {
+			throw new DatabaseErrorException("Failed to get list item information.");
+		}
+		
+		// build list of item ids from listItems using map function
+		List<Integer> itemIds = listItems.stream().map(item -> item.getItemId()).toList();
+		
+		List<RecipeModel> recipes = null;
+		
+		try {
+			// build the item id list parameter using a stream (mapping int to string) and joining with comma
+			String itemParam = itemIds.stream().map(e -> e.toString()).collect(Collectors.joining(","));
+			
+			// create and run sql query with list of item ids and count
+			List<RecipeModel> recipesInit = jdbc.query("SELECT recipes.*, users_recipes.user_id FROM recipes, users_recipes "
+					+ "WHERE recipes.recipe_id=users_recipes.recipe_id AND recipes.recipe_id IN "
+					+ "(SELECT recipe_id FROM recipes_items WHERE item_id IN (?) GROUP BY recipe_id "
+					+ "HAVING COUNT(recipe_id) = ?)",
+					new RecipeMapper(),
+					new Object[] {itemParam, itemIds.size()}
+					);
+			// populate steps and items
+			recipes = addStepsItemsToRecipeList(recipesInit, false);
+			
+		} catch (Exception e) {
+			throw new DatabaseErrorException(e.getMessage());
+		}
+		
+		// return list of recipemodels
+		return recipes;
 	}
 
 }

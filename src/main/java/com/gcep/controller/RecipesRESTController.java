@@ -127,6 +127,19 @@ public class RecipesRESTController {
 		return new ResponseEntity<>(new StatusModel("error", "Failed to search recipes."), HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 	
+	@GetMapping("/itemMatch")
+	public ResponseEntity<?> matchListItemsToRecipes(@RequestBody List<Integer> listIds) {
+		List<RecipeModel> foundRecipes = recipesDataService.searchRecipesByListItems(listIds);
+		
+		if (foundRecipes != null) {
+			if (foundRecipes.size() > 0) {
+				return new ResponseEntity<>(foundRecipes, HttpStatus.OK);
+			}
+			return new ResponseEntity<>(new StatusModel("error", "No recipes found with the given items"), HttpStatus.NOT_FOUND);
+		}
+		return new ResponseEntity<>(new StatusModel("error", "Failed to search recipes."), HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+	
 	/**
 	 * Adds a new recipe to the system.
 	 * @param recipe The recipe information
@@ -365,7 +378,6 @@ public class RecipesRESTController {
 			return new ResponseEntity<>(new StatusModel("error", "Failed to delete recipe item."), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
 	
 
 }
