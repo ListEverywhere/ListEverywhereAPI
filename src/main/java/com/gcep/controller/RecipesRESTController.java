@@ -18,9 +18,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.gcep.data.ListsDataService;
 import com.gcep.data.RecipesDataService;
 import com.gcep.data.RecipesDataServiceInterface;
 import com.gcep.model.CategoryModel;
+import com.gcep.model.ListItemModel;
 import com.gcep.model.RecipeItemModel;
 import com.gcep.model.RecipeModel;
 import com.gcep.model.RecipeStepModel;
@@ -40,6 +42,8 @@ public class RecipesRESTController {
 	
 	@Autowired
 	RecipesDataService recipesDataService;
+	@Autowired
+	ListsDataService listsDataService;
 	
 	/**
 	 * Returns a recipe with the given recipe ID
@@ -127,9 +131,13 @@ public class RecipesRESTController {
 		return new ResponseEntity<>(new StatusModel("error", "Failed to search recipes."), HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 	
-	@GetMapping("/itemMatch")
+	@GetMapping("/item-match")
 	public ResponseEntity<?> matchListItemsToRecipes(@RequestBody List<Integer> listIds) {
-		List<RecipeModel> foundRecipes = recipesDataService.searchRecipesByListItems(listIds);
+		// get list items from lists DAO
+		List<ListItemModel> listItems = listsDataService.getAllListItemDetails(listIds, true);
+		
+		// search recipes using list items
+		List<RecipeModel> foundRecipes = recipesDataService.searchRecipesByListItems(listItems);
 		
 		if (foundRecipes != null) {
 			if (foundRecipes.size() > 0) {

@@ -50,8 +50,6 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 	
 	@Autowired
 	private ItemsService itemsService;
-	@Autowired
-	private ListsDataService listsDataService;
 	
 	public RecipesDataService(DataSource ds) {
 		this.dataSource = ds;
@@ -457,15 +455,7 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 	}
 
 	@Override
-	public List<RecipeModel> searchRecipesByListItems(List<Integer> list_item_ids) {
-		List<ListItemModel> listItems = null;
-		// get list items by mapping list_item_ids to function that gets list item details
-		try {
-			listItems = list_item_ids.stream().map(item -> listsDataService.getListItemDetails(item, true)).toList();
-		} catch (Exception e) {
-			throw new DatabaseErrorException("Failed to get list item information.");
-		}
-		
+	public List<RecipeModel> searchRecipesByListItems(List<ListItemModel> listItems) {
 		// build list of item ids from listItems using map function
 		List<Integer> itemIds = listItems.stream().map(item -> item.getItemId()).toList();
 		

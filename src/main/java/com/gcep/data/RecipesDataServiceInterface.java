@@ -2,6 +2,7 @@ package com.gcep.data;
 import java.util.List;
 
 import com.gcep.model.CategoryModel;
+import com.gcep.model.ListItemModel;
 import com.gcep.model.RecipeItemModel;
 import com.gcep.model.RecipeModel;
 import com.gcep.model.RecipeStepModel;
@@ -120,6 +121,6 @@ public interface RecipesDataServiceInterface {
 	 * @param list_item_ids The ID numbers of list item entries
 	 * @return List of Recipe objects
 	 */
-	public List<RecipeModel> searchRecipesByListItems(List<Integer> list_item_ids);
+	public List<RecipeModel> searchRecipesByListItems(List<ListItemModel> listItems);
 
 }

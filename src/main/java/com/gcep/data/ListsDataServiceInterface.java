@@ -6,6 +6,7 @@ import com.gcep.model.CustomListItemModel;
 import com.gcep.model.ItemModel;
 import com.gcep.model.ListItemModel;
 import com.gcep.model.ListModel;
+import com.gcep.model.RecipeModel;
 
 /**
  * Provides the outline of methods for various operations performed with shopping list data.
@@ -103,5 +104,5 @@ public interface ListsDataServiceInterface {
 	 * @param recipe_id ID number of the recipe
 	 * @return Status of operation. If 1, operation was successful.
 	 */
-	public int mergeRecipeItemsWithList(int list_id, int recipe_id);
+	public int mergeRecipeItemsWithList(int list_id, RecipeModel recipe);
 }
