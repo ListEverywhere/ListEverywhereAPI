@@ -46,7 +46,7 @@ public class AppSecurityConfig {
 		
 		// configures the application endpoints
 		// all endpoints require valid JWT token except for login and register
-		http.csrf().disable()
+		http.cors().and().csrf().disable()
 		.authorizeRequests()
 		.antMatchers("/lists/**").authenticated()
 		.and()

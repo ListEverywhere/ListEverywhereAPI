@@ -106,7 +106,7 @@ public class RecipesRESTController {
 		}
 	}
 	
-	@GetMapping("/search")
+	@PostMapping("/search")
 	public ResponseEntity<?> searchRecipesByName(@RequestBody @Valid SearchModel search) {
 		List<RecipeModel> foundRecipes = null;
 		
@@ -131,7 +131,7 @@ public class RecipesRESTController {
 		return new ResponseEntity<>(new StatusModel("error", "Failed to search recipes."), HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 	
-	@GetMapping("/item-match")
+	@PostMapping("/item-match")
 	public ResponseEntity<?> matchListItemsToRecipes(@RequestBody List<Integer> listIds) {
 		// get list items from lists DAO
 		List<ListItemModel> listItems = listsDataService.getAllListItemDetails(listIds, true);
