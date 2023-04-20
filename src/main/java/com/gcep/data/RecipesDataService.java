@@ -17,6 +17,7 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
@@ -481,10 +482,10 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 					+ "INNER JOIN recipes_published ON recipes.recipe_id=recipes_published.recipe_id "
 					+ "INNER JOIN users_recipes ON recipes.recipe_id=users_recipes.recipe_id "
 					+ "WHERE recipes.recipe_id=users_recipes.recipe_id AND approved=1 AND recipes.recipe_id IN "
-					+ "(SELECT recipe_id FROM recipes_items WHERE item_id IN (?) GROUP BY recipe_id "
+					+ "(SELECT recipe_id FROM recipes_items WHERE item_id IN (" + itemParam + ") GROUP BY recipe_id "
 					+ "HAVING COUNT(recipe_id) = ?)",
 					new RecipeMapper(),
-					new Object[] {itemParam, itemIds.size()}
+					new Object[] {itemIds.size()}
 					);
 			// populate steps and items
 			recipes = addStepsItemsToRecipeList(recipesInit, noItems);
