@@ -107,12 +107,12 @@ public class RecipesRESTController {
 	}
 	
 	@PostMapping("/search")
-	public ResponseEntity<?> searchRecipesByName(@RequestBody @Valid SearchModel search) {
+	public ResponseEntity<?> searchRecipesByName(@RequestBody @Valid SearchModel search, @RequestParam(defaultValue="false") boolean noItems) {
 		List<RecipeModel> foundRecipes = null;
 		
 		try {
 			// use DAO to search for recipes
-			foundRecipes = recipesDataService.searchRecipesByName(search);
+			foundRecipes = recipesDataService.searchRecipesByName(search, noItems);
 		} catch (IllegalArgumentException e) {
 			// user sent invalid search type
 			return new ResponseEntity<>(new StatusModel("error", e.getMessage()), HttpStatus.BAD_REQUEST);
@@ -132,12 +132,12 @@ public class RecipesRESTController {
 	}
 	
 	@PostMapping("/item-match")
-	public ResponseEntity<?> matchListItemsToRecipes(@RequestBody List<Integer> listIds) {
+	public ResponseEntity<?> matchListItemsToRecipes(@RequestBody List<Integer> listIds, @RequestParam(defaultValue="false") boolean noItems) {
 		// get list items from lists DAO
 		List<ListItemModel> listItems = listsDataService.getAllListItemDetails(listIds, true);
 		
 		// search recipes using list items
-		List<RecipeModel> foundRecipes = recipesDataService.searchRecipesByListItems(listItems);
+		List<RecipeModel> foundRecipes = recipesDataService.searchRecipesByListItems(listItems, noItems);
 		
 		if (foundRecipes != null) {
 			if (foundRecipes.size() > 0) {
@@ -226,6 +226,18 @@ public class RecipesRESTController {
 			// recipe is already marked for publishing or is already published
 			return new ResponseEntity<>(new StatusModel("error", "There was an error submitting a recipe for publishing."), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
+	}
+	
+	@PostMapping("/unpublish/{id}")
+	public ResponseEntity<?> unpublishRecipe(@PathVariable(name="id") int recipe_id) {
+		// use DAO to unpublish recipe
+		boolean result = recipesDataService.recipeUnpublish(recipe_id);
+		
+		if (result) {
+			return new ResponseEntity<>(new StatusModel("success", "Recipe is no longer published."), HttpStatus.OK);
+		}
+		
+		return new ResponseEntity<>(new StatusModel("error", "Failed to unpublish recipe."), HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 	
 	/**

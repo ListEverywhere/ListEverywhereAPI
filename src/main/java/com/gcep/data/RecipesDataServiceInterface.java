@@ -60,6 +60,13 @@ public interface RecipesDataServiceInterface {
 	 */
 	public boolean recipePublish(int recipe_id);
 	/**
+	 * Removes a recipe from published status.
+	 * Recipe is not published until it is approved by the service administrator.
+	 * @param recipe_id The ID number of the recipe.
+	 * @return Status
+	 */
+	public boolean recipeUnpublish(int recipe_id);
+	/**
 	 * Adds a step to an existing recipe
 	 * @param step The recipe step information
 	 * @return Status (1 if successful)
@@ -113,7 +120,7 @@ public interface RecipesDataServiceInterface {
 	 * @param search Search query
 	 * @return List of Recipe objects
 	 */
-	public List<RecipeModel> searchRecipesByName(SearchModel search);
+	public List<RecipeModel> searchRecipesByName(SearchModel search, boolean noItems);
 	
 	/**
 	 * Returns a list of recipes that contain the item ids from list_item_ids. Custom items are not supported.
@@ -121,6 +128,6 @@ public interface RecipesDataServiceInterface {
 	 * @param list_item_ids The ID numbers of list item entries
 	 * @return List of Recipe objects
 	 */
-	public List<RecipeModel> searchRecipesByListItems(List<ListItemModel> listItems);
+	public List<RecipeModel> searchRecipesByListItems(List<ListItemModel> listItems, boolean noItems);
 
 }

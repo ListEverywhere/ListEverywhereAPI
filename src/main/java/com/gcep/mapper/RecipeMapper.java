@@ -19,6 +19,8 @@ public class RecipeMapper implements RowMapper<RecipeModel> {
 	@Override
 	public RecipeModel mapRow(ResultSet rs, int rowNum) throws SQLException {
 		// TODO Auto-generated method stub
+		boolean published = rs.getInt("published") == 1;
+		
 		return new RecipeModel(
 				rs.getInt("recipe_id"),
 				rs.getInt("category"),
@@ -27,7 +29,7 @@ public class RecipeMapper implements RowMapper<RecipeModel> {
 				rs.getInt("cook_time"),
 				null,
 				null,
-				false,
+				published,
 				rs.getInt("user_id")
 				);
 	}

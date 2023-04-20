@@ -145,8 +145,10 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 		
 		try {
 			// run query to get recipe by ID
-			recipe = jdbc.queryForObject("SELECT recipes.*, users_recipes.* FROM recipes "
-					+ "INNER JOIN users_recipes ON users_recipes.recipe_id=recipes.recipe_id WHERE recipes.recipe_id=?", new RecipeMapper(), new Object[] {id});
+			recipe = jdbc.queryForObject("SELECT recipes.*, users_recipes.*, COALESCE(recipes_published.approved,-1) published FROM recipes "
+					+ "INNER JOIN users_recipes ON users_recipes.recipe_id=recipes.recipe_id "
+					+ "LEFT JOIN recipes_published ON recipes.recipe_id=recipes_published.recipe_id "
+					+ "WHERE recipes.recipe_id=?", new RecipeMapper(), new Object[] {id});
 			// populate steps
 			recipe.setRecipeSteps(getRecipeSteps(recipe));
 			// populate items
@@ -178,8 +180,10 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 		
 		try {
 			// run query to get recipes with matching user id
-			var recipesInit = jdbc.query("SELECT recipes.*, users_recipes.user_id, users_recipes.recipe_id FROM recipes "
-					+ "INNER JOIN users_recipes ON recipes.recipe_id=users_recipes.recipe_id WHERE users_recipes.user_id=?", new RecipeMapper(), new Object[] {user_id});
+			var recipesInit = jdbc.query("SELECT recipes.*, users_recipes.user_id, users_recipes.recipe_id, COALESCE(recipes_published.approved,-1) published FROM recipes "
+					+ "INNER JOIN users_recipes ON recipes.recipe_id=users_recipes.recipe_id "
+					+ "LEFT JOIN recipes_published ON recipes.recipe_id=recipes_published.recipe_id "
+					+ "WHERE users_recipes.user_id=?", new RecipeMapper(), new Object[] {user_id});
 			// populate items and steps for each recipe
 			recipes = addStepsItemsToRecipeList(recipesInit, noItems);
 		} catch (Exception e) {
@@ -205,9 +209,11 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 		
 		try {
 			// run query to get recipes with matching category
-			var recipesInit = jdbc.query("SELECT recipes.*, categories.category_id, users_recipes.* FROM recipes "
+			var recipesInit = jdbc.query("SELECT recipes.*, categories.category_id, users_recipes.*, recipes_published.approved published FROM recipes "
 					+ "INNER JOIN categories ON recipes.category=categories.category_id "
-					+ "INNER JOIN users_recipes ON users_recipes.recipe_id=recipes.recipe_id WHERE category_id=?", new RecipeMapper(), new Object[] {category});
+					+ "INNER JOIN users_recipes ON users_recipes.recipe_id=recipes.recipe_id "
+					+ "INNER JOIN recipes_published ON recipes.recipe_id=recipes_published.recipe_id "
+					+ "WHERE category_id=? AND approved=1", new RecipeMapper(), new Object[] {category});
 			// populate items and steps for each recipe
 			recipes = addStepsItemsToRecipeList(recipesInit, noItems);
 		} catch (Exception e) {
@@ -419,7 +425,7 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 	}
 
 	@Override
-	public List<RecipeModel> searchRecipesByName(SearchModel search) {
+	public List<RecipeModel> searchRecipesByName(SearchModel search, boolean noItems) {
 		List<RecipeModel> retval = null;
 		String preparedSearch = "";
 		
@@ -443,8 +449,13 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 		
 		try {
 			// run query to get recipes where recipe name matches preparedSearch
-			retval = jdbc.query("SELECT recipes.*, users_recipes.user_id, users_recipes.recipe_id FROM recipes "
-					+ "INNER JOIN users_recipes ON recipes.recipe_id=users_recipes.recipe_id WHERE recipe_name LIKE ?", new RecipeMapper(), new Object[] {preparedSearch});
+			retval = jdbc.query("SELECT recipes.*, users_recipes.user_id, users_recipes.recipe_id, recipes_published.approved published FROM recipes "
+					+ "INNER JOIN users_recipes ON recipes.recipe_id=users_recipes.recipe_id "
+					+ "INNER JOIN recipes_published ON recipes.recipe_id=recipes_published.recipe_id "
+					+ "WHERE recipe_name LIKE ? AND approved=1", new RecipeMapper(), new Object[] {preparedSearch});
+			
+			
+			retval = addStepsItemsToRecipeList(retval, noItems);
 			
 		} catch (Exception e) {
 			// an error occurred with the database
@@ -455,7 +466,7 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 	}
 
 	@Override
-	public List<RecipeModel> searchRecipesByListItems(List<ListItemModel> listItems) {
+	public List<RecipeModel> searchRecipesByListItems(List<ListItemModel> listItems, boolean noItems) {
 		// build list of item ids from listItems using map function
 		List<Integer> itemIds = listItems.stream().map(item -> item.getItemId()).toList();
 		
@@ -466,15 +477,17 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 			String itemParam = itemIds.stream().map(e -> e.toString()).collect(Collectors.joining(","));
 			
 			// create and run sql query with list of item ids and count
-			List<RecipeModel> recipesInit = jdbc.query("SELECT recipes.*, users_recipes.user_id FROM recipes, users_recipes "
-					+ "WHERE recipes.recipe_id=users_recipes.recipe_id AND recipes.recipe_id IN "
+			List<RecipeModel> recipesInit = jdbc.query("SELECT recipes.*, users_recipes.user_id, recipes_published.approved AS published FROM recipes "
+					+ "INNER JOIN recipes_published ON recipes.recipe_id=recipes_published.recipe_id "
+					+ "INNER JOIN users_recipes ON recipes.recipe_id=users_recipes.recipe_id "
+					+ "WHERE recipes.recipe_id=users_recipes.recipe_id AND approved=1 AND recipes.recipe_id IN "
 					+ "(SELECT recipe_id FROM recipes_items WHERE item_id IN (?) GROUP BY recipe_id "
 					+ "HAVING COUNT(recipe_id) = ?)",
 					new RecipeMapper(),
 					new Object[] {itemParam, itemIds.size()}
 					);
 			// populate steps and items
-			recipes = addStepsItemsToRecipeList(recipesInit, false);
+			recipes = addStepsItemsToRecipeList(recipesInit, noItems);
 			
 		} catch (Exception e) {
 			throw new DatabaseErrorException(e.getMessage());
@@ -482,6 +495,21 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 		
 		// return list of recipemodels
 		return recipes;
+	}
+
+	@Override
+	public boolean recipeUnpublish(int recipe_id) {
+		int result = 0;
+		
+		try {
+			// run query to delete recipe from published table
+			result = jdbc.update("DELETE FROM recipes_published WHERE recipe_id=?", recipe_id);
+		}
+		catch (Exception e) {
+			throw new DatabaseErrorException();
+		}
+		// return status of transaction
+		return result > 0;
 	}
 
 }
