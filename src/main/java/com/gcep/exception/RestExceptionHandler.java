@@ -3,6 +3,8 @@ package com.gcep.exception;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +25,8 @@ import com.gcep.model.StatusModel;
  */
 @ControllerAdvice
 public class RestExceptionHandler extends ResponseEntityExceptionHandler {
+	
+	private static final Logger log = LoggerFactory.getLogger(RestExceptionHandler.class);
 
 	@CrossOrigin
 	@Override
@@ -48,6 +52,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 	@ExceptionHandler(DatabaseErrorException.class)
 	protected ResponseEntity<Object> handleDatabaseExeption(Exception ex) {
 		StatusModel retStatus = new StatusModel("error", ex.getMessage());
+		log.error("ListEverywhere API ERROR: " + ex.getMessage());
 		return new ResponseEntity<>(retStatus, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 }

@@ -460,6 +460,11 @@ public class ListsDataService implements ListsDataServiceInterface {
 		// get items from list
 		List<ItemModel> items = getListItems(list_id, true, false);
 		
+		// if position is greater than list size -1, invalid position
+		if (position > items.size()-1) {
+			return false;
+		}
+		
 		// use stream to get item that matches position provided
 		Optional<ItemModel> existingItem = items.stream().filter(e -> e.getPosition() == position).findFirst();
 		
