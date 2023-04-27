@@ -2,6 +2,8 @@ package com.gcep.controller;
 
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,12 +18,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.gcep.data.ListsDataService;
 import com.gcep.data.RecipesDataService;
 import com.gcep.data.RecipesDataServiceInterface;
 import com.gcep.model.CategoryModel;
+import com.gcep.model.ListItemModel;
 import com.gcep.model.RecipeItemModel;
 import com.gcep.model.RecipeModel;
 import com.gcep.model.RecipeStepModel;
+import com.gcep.model.SearchModel;
 import com.gcep.model.StatusModel;
 
 /**
@@ -37,6 +42,8 @@ public class RecipesRESTController {
 	
 	@Autowired
 	RecipesDataService recipesDataService;
+	@Autowired
+	ListsDataService listsDataService;
 	
 	/**
 	 * Returns a recipe with the given recipe ID
@@ -97,6 +104,48 @@ public class RecipesRESTController {
 			// no recipes found
 			return new ResponseEntity<>(new StatusModel("error", "Recipes not found"), HttpStatus.NOT_FOUND);
 		}
+	}
+	
+	@PostMapping("/search")
+	public ResponseEntity<?> searchRecipesByName(@RequestBody @Valid SearchModel search, @RequestParam(defaultValue="false") boolean noItems) {
+		List<RecipeModel> foundRecipes = null;
+		
+		try {
+			// use DAO to search for recipes
+			foundRecipes = recipesDataService.searchRecipesByName(search, noItems);
+		} catch (IllegalArgumentException e) {
+			// user sent invalid search type
+			return new ResponseEntity<>(new StatusModel("error", e.getMessage()), HttpStatus.BAD_REQUEST);
+		}
+		
+		if (foundRecipes != null) {
+			if (foundRecipes.size() > 0) {
+				// successfully found recipes
+				return new ResponseEntity<>(foundRecipes, HttpStatus.OK);
+			}
+			// no error with DAO, but no recipes were found
+			return new ResponseEntity<>(new StatusModel("error", "No recipes found."), HttpStatus.NOT_FOUND);
+		}
+		
+		// error occurred finding recipes
+		return new ResponseEntity<>(new StatusModel("error", "Failed to search recipes."), HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+	
+	@PostMapping("/item-match")
+	public ResponseEntity<?> matchListItemsToRecipes(@RequestBody List<Integer> listIds, @RequestParam(defaultValue="false") boolean noItems) {
+		// get list items from lists DAO
+		List<ListItemModel> listItems = listsDataService.getAllListItemDetails(listIds, true);
+		
+		// search recipes using list items
+		List<RecipeModel> foundRecipes = recipesDataService.searchRecipesByListItems(listItems, noItems);
+		
+		if (foundRecipes != null) {
+			if (foundRecipes.size() > 0) {
+				return new ResponseEntity<>(foundRecipes, HttpStatus.OK);
+			}
+			return new ResponseEntity<>(new StatusModel("error", "No recipes found with the given items"), HttpStatus.NOT_FOUND);
+		}
+		return new ResponseEntity<>(new StatusModel("error", "Failed to search recipes."), HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 	
 	/**
@@ -177,6 +226,18 @@ public class RecipesRESTController {
 			// recipe is already marked for publishing or is already published
 			return new ResponseEntity<>(new StatusModel("error", "There was an error submitting a recipe for publishing."), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
+	}
+	
+	@PostMapping("/unpublish/{id}")
+	public ResponseEntity<?> unpublishRecipe(@PathVariable(name="id") int recipe_id) {
+		// use DAO to unpublish recipe
+		boolean result = recipesDataService.recipeUnpublish(recipe_id);
+		
+		if (result) {
+			return new ResponseEntity<>(new StatusModel("success", "Recipe is no longer published."), HttpStatus.OK);
+		}
+		
+		return new ResponseEntity<>(new StatusModel("error", "Failed to unpublish recipe."), HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 	
 	/**
@@ -337,7 +398,6 @@ public class RecipesRESTController {
 			return new ResponseEntity<>(new StatusModel("error", "Failed to delete recipe item."), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
 	
 
 }

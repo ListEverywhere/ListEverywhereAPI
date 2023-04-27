@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
@@ -23,6 +24,7 @@ import com.gcep.model.StatusModel;
 @ControllerAdvice
 public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
+	@CrossOrigin
 	@Override
 	protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
             HttpHeaders headers, HttpStatus status, WebRequest request) {
@@ -42,6 +44,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 	 * @param ex The exception that was caught
 	 * @return JSON StatusModel object with the exception message
 	 */
+	@CrossOrigin
 	@ExceptionHandler(DatabaseErrorException.class)
 	protected ResponseEntity<Object> handleDatabaseExeption(Exception ex) {
 		StatusModel retStatus = new StatusModel("error", ex.getMessage());

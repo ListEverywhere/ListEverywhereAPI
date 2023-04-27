@@ -18,11 +18,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.gcep.data.ListsDataService;
 import com.gcep.data.ListsDataServiceInterface;
+import com.gcep.data.RecipesDataService;
 import com.gcep.model.CustomListItemModel;
 import com.gcep.model.FoodItemModel;
 import com.gcep.model.ItemModel;
 import com.gcep.model.ListItemModel;
 import com.gcep.model.ListModel;
+import com.gcep.model.RecipeModel;
 import com.gcep.model.StatusModel;
 import com.gcep.service.ItemsService;
 
@@ -41,6 +43,8 @@ public class ListsRESTController {
 	ListsDataService listsDataService;
 	@Autowired
 	ItemsService itemsService;
+	@Autowired
+	RecipesDataService recipesDataService;
 	
 	/**
 	 * GET method for getting a list with the given list ID
@@ -68,9 +72,9 @@ public class ListsRESTController {
 	 * @return JSON response
 	 */
 	@GetMapping("/user/{id}")
-	public ResponseEntity<?> getListsByUser(@PathVariable(name="id") int id, @RequestParam(defaultValue="false") boolean noItems) {
+	public ResponseEntity<?> getListsByUser(@PathVariable(name="id") int id, @RequestParam(defaultValue="false") boolean noItems, @RequestParam(defaultValue="false") boolean noCustomItems) {
 		// use DAO to get lists by user id
-		List<ListModel> lists = listsDataService.getListsByUser(id, noItems);
+		List<ListModel> lists = listsDataService.getListsByUser(id, noItems, noCustomItems);
 		
 		if (lists.size() > 0) {
 			// one or more lists were found
@@ -142,6 +146,26 @@ public class ListsRESTController {
 			// failed to delete list
 			return new ResponseEntity<>(new StatusModel("error", "There was an error deleting the list."), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
+	}
+	
+	@PostMapping("{list_id}/merge-recipe/{recipe_id}")
+	public ResponseEntity<?> mergeRecipeWithList(@PathVariable(name="list_id") int list_id, @PathVariable(name="recipe_id") int recipe_id) {
+		// use recipes DAO to get recipe information
+		RecipeModel recipe = recipesDataService.getRecipeById(recipe_id);
+		
+		// check if recipe exists
+		if (recipe == null) {
+			return new ResponseEntity<>(new StatusModel("error", "Recipe does not exist."), HttpStatus.NOT_FOUND);
+		}
+		
+		// use lists DAO to merge recipe with list
+		int result = listsDataService.mergeRecipeItemsWithList(list_id, recipe);
+		
+		if (result > 0) {
+			return new ResponseEntity<>(new StatusModel("success", "Successfully merged recipe items into list!"), HttpStatus.OK);
+		}
+		
+		return new ResponseEntity<>(new StatusModel("error", "Failed to merge recipe with list."), HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 	
 	/**
@@ -299,6 +323,8 @@ public class ListsRESTController {
 			return new ResponseEntity<>(new StatusModel("error", "There was an error deleting the item."), HttpStatus.BAD_REQUEST);
 		}
 	}
+	
+	
 	
 	
 

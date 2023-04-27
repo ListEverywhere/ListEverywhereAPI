@@ -30,6 +30,8 @@ import com.gcep.model.FoodItemModel;
 import com.gcep.model.ItemModel;
 import com.gcep.model.ListItemModel;
 import com.gcep.model.ListModel;
+import com.gcep.model.RecipeItemModel;
+import com.gcep.model.RecipeModel;
 import com.gcep.service.ItemsService;
 
 /**
@@ -61,7 +63,7 @@ public class ListsDataService implements ListsDataServiceInterface {
 	 * @return
 	 */
 	private List<ItemModel> getListItems(int list_id) {
-		return getListItems(list_id, false);
+		return getListItems(list_id, false, false);
 	}
 	
 	/**
@@ -72,7 +74,7 @@ public class ListsDataService implements ListsDataServiceInterface {
 	 * @param noItemsService If true, disables fetching item names from ItemsService
 	 * @return List containing shopping list items
 	 */
-	private List<ItemModel> getListItems(int list_id, boolean noItemsService) {
+	private List<ItemModel> getListItems(int list_id, boolean noItemsService, boolean noCustomItems) {
 		List<ItemModel> itemList = new ArrayList<ItemModel>();
 		// get ListItems
 		try {
@@ -100,16 +102,19 @@ public class ListsDataService implements ListsDataServiceInterface {
 		}
 		
 		// get CustomListItems
-		try {
-			// run query to get custom list items from specified list
-			var items = jdbcTemplate.query("SELECT lists.list_id, lists_items_custom.* FROM lists_items_custom "
-					+ "INNER JOIN lists ON lists_items_custom.list_id=lists.list_id WHERE lists.list_id=?",
-					new CustomListItemMapper(), new Object[] { list_id});
-			// add custom list items to returned item list
-			itemList.addAll(items);
-		} catch (Exception e) {
-			throw new DatabaseErrorException(e.getMessage());
+		if (!noCustomItems) {
+			try {
+				// run query to get custom list items from specified list
+				var items = jdbcTemplate.query("SELECT lists.list_id, lists_items_custom.* FROM lists_items_custom "
+						+ "INNER JOIN lists ON lists_items_custom.list_id=lists.list_id WHERE lists.list_id=?",
+						new CustomListItemMapper(), new Object[] { list_id});
+				// add custom list items to returned item list
+				itemList.addAll(items);
+			} catch (Exception e) {
+				throw new DatabaseErrorException(e.getMessage());
+			}
 		}
+		
 		
 		// sort the item list by position
 		itemList.sort((i1, i2) -> Integer.compare(i1.getPosition(), i2.getPosition()));
@@ -139,16 +144,17 @@ public class ListsDataService implements ListsDataServiceInterface {
 	@Override
 	public List<ListModel> getListsByUser(int user_id) {
 		// automatically enable items service
-		return getListsByUser(user_id, false);
+		return getListsByUser(user_id, false, false);
 	}
 	
 	/**
 	 * Returns a list of all shopping list items by User ID.
 	 * @param user_id User ID number
 	 * @param noItemsService If true, the list will not contain items
+	 * @param noCustomItems If true, the list will not contain custom items
 	 * @return List of Shopping Lists
 	 */
-	public List<ListModel> getListsByUser(int user_id, boolean noItemsService) {
+	public List<ListModel> getListsByUser(int user_id, boolean noItemsService, boolean noCustomItems) {
 		List<ListModel> lists = null;
 		try {
 			// run query to get all lists with a matching user id
@@ -162,7 +168,7 @@ public class ListsDataService implements ListsDataServiceInterface {
 				for (int i = 0; i < lists.size(); i++) {
 					var newList = lists.get(i);
 					// get the items and item information
-					newList.setListItems(getListItems(newList.getListId()));
+					newList.setListItems(getListItems(newList.getListId(), false, noCustomItems));
 					// replace unpopulated list with populated list
 					lists.set(i, newList);
 				}
@@ -381,7 +387,7 @@ public class ListsDataService implements ListsDataServiceInterface {
 			// SWAP
 			
 			// get old item at position
-			Optional<ItemModel> oldItem = getListItems(list_id, true).stream().filter(e -> e.getPosition() == newPosition).findFirst();
+			Optional<ItemModel> oldItem = getListItems(list_id, true, false).stream().filter(e -> e.getPosition() == newPosition).findFirst();
 			
 			// if old item does not exist, return false
 			if (oldItem.isEmpty()) {
@@ -408,7 +414,7 @@ public class ListsDataService implements ListsDataServiceInterface {
 			// ALL ITEMS AFTER
 			
 			// get the items from the list
-			List<ItemModel> items = getListItems(list_id, true);
+			List<ItemModel> items = getListItems(list_id, true, false);
 			
 			int currentItemPosition = -1;
 			int currentItemIndex = -1;
@@ -452,7 +458,7 @@ public class ListsDataService implements ListsDataServiceInterface {
 		}
 		
 		// get items from list
-		List<ItemModel> items = getListItems(list_id, true);
+		List<ItemModel> items = getListItems(list_id, true, false);
 		
 		// use stream to get item that matches position provided
 		Optional<ItemModel> existingItem = items.stream().filter(e -> e.getPosition() == position).findFirst();
@@ -580,7 +586,7 @@ public class ListsDataService implements ListsDataServiceInterface {
 		
 		try {
 			// get list items with items service disabled as item names are not needed here
-			items = getListItems(list_id, true);
+			items = getListItems(list_id, true, false);
 			
 			// remove any items that come before the current item position
 			items.removeIf(e -> e.getPosition() <= position);
@@ -644,6 +650,56 @@ public class ListsDataService implements ListsDataServiceInterface {
 			throw new DatabaseErrorException(e.getMessage());
 		}
 		return item;
+	}
+	
+	public List<ListItemModel> getAllListItemDetails(List<Integer> listItemIds, boolean noItemsService) {
+		List<ListItemModel> items = null;
+		
+		try {
+			items = new ArrayList<ListItemModel>();
+			for (int listItemId : listItemIds) {
+				items.add(getListItemDetails(listItemId, noItemsService));
+			}
+		} catch (Exception e) {
+			throw new DatabaseErrorException(e.getMessage());
+		}
+		
+		return items;
+	}
+
+	@Override
+	public int mergeRecipeItemsWithList(int list_id, RecipeModel recipe) {
+		int retval = 0;
+		
+		try {
+			// get list items from list id, no custom items
+			List<ItemModel> items = getListItems(list_id, true, true);
+			
+			// get recipe items
+			List<RecipeItemModel> recipeItems = recipe.getRecipeItems();
+			
+			// get the item ids of the list items
+			List<Integer> listItemIds = items.stream().map(item -> item.getItemId()).toList();
+			
+			// remove any item ids from the recipe that are also in the list
+			recipeItems = recipeItems.stream().filter(item -> !listItemIds.contains(item.getItemId())).toList();
+			
+			// add each recipe item to list
+			for (RecipeItemModel item : recipeItems) {
+				// create new list item
+				ListItemModel newItem = new ListItemModel(item.getItemId(), null, false, -1, -1, list_id);
+				
+				// add item to list
+				addListItem(list_id, newItem);
+				
+			}
+			
+			retval = 1;
+		} catch (Exception e) {
+			throw new DatabaseErrorException(e.getMessage());
+		}
+		
+		return retval;
 	}
 
 }
