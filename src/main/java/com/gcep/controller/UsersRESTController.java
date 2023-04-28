@@ -82,6 +82,18 @@ public class UsersRESTController {
 	}
 	
 	/**
+	 * Returns the user information using the credentials from the JWT token
+	 * @return JSON response
+	 */
+	@GetMapping("/user")
+ 	public ResponseEntity<?> getDetailsFromToken() {
+ 		UserDetailsModel user = getCurrentUser();
+
+
+ 		return new ResponseEntity<>(user, HttpStatus.OK);
+ 	}
+	
+	/**
 	 * POST method for adding a new user. All fields must be valid.
 	 * @param user The user information
 	 * @return JSON response
