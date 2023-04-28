@@ -32,7 +32,7 @@ import com.gcep.security.TokenUtility;
 /**
  * Provides the REST service endpoints for user data operations
  * @author Gabriel Cepleanu
- * @version 0.1
+ * @version 0.2
  *
  */
 @RestController
@@ -73,17 +73,12 @@ public class UsersRESTController {
 		}
 	}
 	
-	
+	/**
+	 * Returns the user information from the token located in the request
+	 * @return User information
+	 */
 	private UserDetailsModel getCurrentUser() {
 		return (UserDetailsModel)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-	}
-	
-	@GetMapping("/user")
-	public ResponseEntity<?> getDetailsFromToken() {
-		UserDetailsModel user = getCurrentUser();
-		
-		
-		return new ResponseEntity<>(user, HttpStatus.OK);
 	}
 	
 	/**
@@ -113,12 +108,14 @@ public class UsersRESTController {
 	 */
 	@PutMapping("/")
 	public ResponseEntity<?> updateUser(@RequestBody UserModel updated) {
-		// use DAO to update user information
+		// get the current user from token
 		UserDetailsModel user = getCurrentUser();
 		
 		UserModel result = null;
 		
+		// check if the id in the token and request match
 		if (updated.getId() == user.getId()) {
+			// use DAO to update user information
 			result = usersDataService.updateUser(updated);
 		}
 		
@@ -139,13 +136,15 @@ public class UsersRESTController {
 	 */
 	@DeleteMapping("/{id}")
 	public ResponseEntity<?> deleteUser(@PathVariable(name="id") int id) {
+		// get the current user from token
 		UserDetailsModel user = getCurrentUser();
 		boolean result = false;
 		
+		// check if the id in the token and request match
 		if (user.getId() == id) {
+			// use DAO to delete user
 			result = usersDataService.deleteUser(id);
 		}
-		// use DAO to delete user
 		
 		if (result) {
 			// user was deleted

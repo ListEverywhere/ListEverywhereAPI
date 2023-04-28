@@ -17,7 +17,7 @@ import com.gcep.model.UserModel;
 /**
  * Provides the necessary operations for user information
  * @author Gabriel Cepleanu
- * @version 0.1
+ * @version 0.2
  *
  */
 @Repository

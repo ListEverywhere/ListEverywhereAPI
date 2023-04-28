@@ -6,3 +6,4 @@ com.gcep.mapper
 com.gcep.model
 com.gcep.security
 com.gcep.service
+com.gcep.util

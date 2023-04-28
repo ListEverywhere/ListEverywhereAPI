@@ -20,7 +20,7 @@ import com.gcep.model.StatusModel;
 /**
  * This class intercepts various controller and data service exceptions and reports a readable JSON error response
  * @author Gabriel Cepleanu
- * @version 0.1
+ * @version 1.0
  *
  */
 @ControllerAdvice

@@ -8,6 +8,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.interceptor.AbstractMonitoringInterceptor;
 
+/**
+ * Provides the method for tracing application method execution.
+ * Logs the start time, method execution duration, and the end time.
+ * @author Gabriel Cepleanu
+ * @version 1.0
+ */
 public class TracerLog extends AbstractMonitoringInterceptor {
 
 	private static final long serialVersionUID = 8732437489213545919L;

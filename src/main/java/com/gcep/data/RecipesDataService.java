@@ -39,7 +39,7 @@ import com.gcep.service.ItemsService;
 /**
  * Provides the necessary operations for recipe information.
  * @author Gabriel Cepleanu
- * @version 0.2
+ * @version 1.0
  *
  */
 @Repository
@@ -478,6 +478,13 @@ public class RecipesDataService implements RecipesDataServiceInterface {
 			String itemParam = itemIds.stream().map(e -> e.toString()).collect(Collectors.joining(","));
 			
 			// create and run sql query with list of item ids and count
+			// sql query explained:
+			// select all from recipes, user id, recipe approved renamed to published from recipes table
+			// inner join to match recipe id to entry in recipes_published
+			// inner join to match recipe id to entry in users_recipes
+			// where recipe_id matches entry in users_recipes AND publish approved is true AND recipe id is in the inner query
+			// select recipe_id from recipes_items where the item id is in the list of item ids (from listItems) grouped by the recipe id
+			// where the count of recipe item entries is equal to the number of listItems that were given
 			List<RecipeModel> recipesInit = jdbc.query("SELECT recipes.*, users_recipes.user_id, recipes_published.approved AS published FROM recipes "
 					+ "INNER JOIN recipes_published ON recipes.recipe_id=recipes_published.recipe_id "
 					+ "INNER JOIN users_recipes ON recipes.recipe_id=users_recipes.recipe_id "

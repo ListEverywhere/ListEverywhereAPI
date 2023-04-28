@@ -11,14 +11,14 @@ import com.gcep.model.RecipeModel;
  * Mapper class for recipe objects from the database.
  * Does not handle lists for recipe items and steps
  * @author Gabriel Cepleanu
- * @version 0.1
+ * @version 1.0
  *
  */
 public class RecipeMapper implements RowMapper<RecipeModel> {
 
 	@Override
 	public RecipeModel mapRow(ResultSet rs, int rowNum) throws SQLException {
-		// TODO Auto-generated method stub
+		// convert published from int to boolean
 		boolean published = rs.getInt("published") == 1;
 		
 		return new RecipeModel(

@@ -11,7 +11,7 @@ import com.gcep.model.RecipeModel;
 /**
  * Provides the outline of methods for various operations performed with shopping list data.
  * @author Gabriel Cepleanu
- * @version 0.2
+ * @version 1.0
  *
  */
 public interface ListsDataServiceInterface {
@@ -70,19 +70,6 @@ public interface ListsDataServiceInterface {
 	 * @return Status of operation. If 1, operation was successful.
 	 */
 	public int deleteCustomListItem(int id);
-	/**
-	 * Searches for items containing the search term in the item name.
-	 * @param search_term The item name (contains, case insensitive)
-	 * @return A list of matching items.
-	 */
-	public List<ItemModel> searchItems(String search_term);
-	/**
-	 * Gets an item information with the specified ID
-	 * @param item_id The ID of the item
-	 * @return Item information
-	 */
-	public int GetItemById(int item_id);
-	
 	/**
 	 * Gets a single list item information with the specified ID
 	 * @param list_item_id ID number of the list item entry

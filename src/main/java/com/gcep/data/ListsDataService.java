@@ -37,7 +37,7 @@ import com.gcep.service.ItemsService;
 /**
  * Provides the necessary operations for shopping list information.
  * @author Gabriel Cepleanu
- * @version 0.2
+ * @version 1.0
  *
  */
 @Repository
@@ -604,24 +604,6 @@ public class ListsDataService implements ListsDataServiceInterface {
 		return items;
 	}
 
-	/**
-	 * TODO: Remove this method
-	 */
-	@Override
-	public List<ItemModel> searchItems(String search_term) {
-		// TODO to be implemented in a future version
-		return null;
-	}
-
-	/**
-	 * TODO: Remove this method
-	 */
-	@Override
-	public int GetItemById(int item_id) {
-		// TODO to be implemented in a future version
-		return 0;
-	}
-
 	@Override
 	public ListItemModel getListItemDetails(int list_item_id, boolean noItemsService) {
 		ListItemModel item = null;
@@ -657,18 +639,28 @@ public class ListsDataService implements ListsDataServiceInterface {
 		return item;
 	}
 	
+	/**
+	 * Returns a list of items with item information from the given ListItemIds
+	 * @param listItemIds List of ListItemIds to get the information of
+	 * @param noItemsService If true, does not get item names
+	 * @return List of List Item Objects
+	 */
 	public List<ListItemModel> getAllListItemDetails(List<Integer> listItemIds, boolean noItemsService) {
 		List<ListItemModel> items = null;
 		
 		try {
+			// create new arraylist
 			items = new ArrayList<ListItemModel>();
+			// for each list item, get item information and add it to the arraylist
 			for (int listItemId : listItemIds) {
 				items.add(getListItemDetails(listItemId, noItemsService));
 			}
 		} catch (Exception e) {
+			// error with database
 			throw new DatabaseErrorException(e.getMessage());
 		}
 		
+		// return new list of list items
 		return items;
 	}
 

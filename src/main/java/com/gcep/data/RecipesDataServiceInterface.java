@@ -11,7 +11,7 @@ import com.gcep.model.SearchModel;
 /**
  * Provides the outline of methods for various operations performed with recipes data.
  * @author Gabriel Cepleanu
- * @version 0.1
+ * @version 1.0
  *
  */
 public interface RecipesDataServiceInterface {

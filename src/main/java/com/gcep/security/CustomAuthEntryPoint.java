@@ -14,6 +14,11 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gcep.model.StatusModel;
 
+/**
+ * This class handles errors with JWT authentication and displays a JSON response page if an error occurs (such as not being authenticated)
+ * @author Gabriel Cepleanu
+ * @verison 0.2
+ */
 @Component
 public class CustomAuthEntryPoint implements AuthenticationEntryPoint {
 

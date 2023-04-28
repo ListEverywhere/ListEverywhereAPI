@@ -31,7 +31,7 @@ import com.gcep.service.ItemsService;
 /**
  * Provides the REST service endpoints for shopping list data operations
  * @author Gabriel Cepleanu
- * @version 0.1
+ * @version 1.0
  *
  */
 @RestController
@@ -69,6 +69,8 @@ public class ListsRESTController {
 	/**
 	 * GET method for getting a list of all shopping lists from a specified user ID
 	 * @param id The ID of the user
+	 * @param noItems If true, returns lists with no items
+	 * @param noCustomItems If true, returns lists with no custom items
 	 * @return JSON response
 	 */
 	@GetMapping("/user/{id}")
@@ -148,6 +150,12 @@ public class ListsRESTController {
 		}
 	}
 	
+	/**
+	 * POST method for merging recipe items with a given shopping list
+	 * @param list_id ID number of the list to merge with
+	 * @param recipe_id Id number of the recipe to merge with
+	 * @return JSON response
+	 */
 	@PostMapping("{list_id}/merge-recipe/{recipe_id}")
 	public ResponseEntity<?> mergeRecipeWithList(@PathVariable(name="list_id") int list_id, @PathVariable(name="recipe_id") int recipe_id) {
 		// use recipes DAO to get recipe information
@@ -162,9 +170,11 @@ public class ListsRESTController {
 		int result = listsDataService.mergeRecipeItemsWithList(list_id, recipe);
 		
 		if (result > 0) {
+			// successfully merged
 			return new ResponseEntity<>(new StatusModel("success", "Successfully merged recipe items into list!"), HttpStatus.OK);
 		}
 		
+		// failed to merge
 		return new ResponseEntity<>(new StatusModel("error", "Failed to merge recipe with list."), HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 	
@@ -231,6 +241,12 @@ public class ListsRESTController {
 		}
 	}
 	
+	/**
+	 * PUT method for updating a list item position.
+	 * List items are items with an associated item ID.
+	 * @param item The updated list item information
+	 * @return JSON response
+	 */
 	@PutMapping("/items/position")
 	public ResponseEntity<?> editListItemPosition(@RequestBody ListItemModel item) {
 		// use DAO to update list item
@@ -267,6 +283,12 @@ public class ListsRESTController {
 		}
 	}
 	
+	/**
+	 * PUT method for updating a custom list item position.
+	 * Custom list items are items that do not have an item ID, rather the name is given by the user.
+	 * @param item The updated custom list item information
+	 * @return JSON response
+	 */
 	@PutMapping("/items/custom/position")
 	public ResponseEntity<?> editCustomListItemPosition(@RequestBody CustomListItemModel item) {
 		// use DAO to update list item

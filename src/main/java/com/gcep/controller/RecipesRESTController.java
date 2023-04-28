@@ -32,7 +32,7 @@ import com.gcep.model.StatusModel;
 /**
  * Provides the REST service endpoints for recipe data operations
  * @author Gabriel Cepleanu
- * @version 0.1
+ * @version 1.0
  *
  */
 @RestController
@@ -68,7 +68,8 @@ public class RecipesRESTController {
 	
 	/**
 	 * Returns a list of recipes with the given category ID
-	 * @param id The ID numbe of the category
+	 * @param id The ID number of the category
+	 * @param noItems If true, returns recipes without items
 	 * @return JSON response
 	 */
 	@GetMapping("/categories/{id}")
@@ -89,6 +90,7 @@ public class RecipesRESTController {
 	/**
 	 * Returns a list of recipes with the given user ID
 	 * @param id The ID number of the user
+	 * @param noItems If true, returns recipes without items
 	 * @return JSON response
 	 */
 	@GetMapping("/user/{id}")
@@ -106,6 +108,12 @@ public class RecipesRESTController {
 		}
 	}
 	
+	/**
+	 * POST method for searching recipes by name.
+	 * @param search Search information
+	 * @param noItems If true, returns recipes without items
+	 * @return JSON response
+	 */
 	@PostMapping("/search")
 	public ResponseEntity<?> searchRecipesByName(@RequestBody @Valid SearchModel search, @RequestParam(defaultValue="false") boolean noItems) {
 		List<RecipeModel> foundRecipes = null;
@@ -131,6 +139,12 @@ public class RecipesRESTController {
 		return new ResponseEntity<>(new StatusModel("error", "Failed to search recipes."), HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 	
+	/**
+	 * POST method for finding recipes with matching list items
+	 * @param listIds List of ListItemIds to search using
+	 * @param noItems If true, returns recipes without items
+	 * @return JSON response
+	 */
 	@PostMapping("/item-match")
 	public ResponseEntity<?> matchListItemsToRecipes(@RequestBody List<Integer> listIds, @RequestParam(defaultValue="false") boolean noItems) {
 		// get list items from lists DAO
@@ -140,11 +154,15 @@ public class RecipesRESTController {
 		List<RecipeModel> foundRecipes = recipesDataService.searchRecipesByListItems(listItems, noItems);
 		
 		if (foundRecipes != null) {
+			// no error with DAO transactions
 			if (foundRecipes.size() > 0) {
+				// more than one recipe available, return recipes
 				return new ResponseEntity<>(foundRecipes, HttpStatus.OK);
 			}
+			// no recipes were found
 			return new ResponseEntity<>(new StatusModel("error", "No recipes found with the given items"), HttpStatus.NOT_FOUND);
 		}
+		// error finding recipes
 		return new ResponseEntity<>(new StatusModel("error", "Failed to search recipes."), HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 	
@@ -228,15 +246,22 @@ public class RecipesRESTController {
 		}
 	}
 	
+	/**
+	 * Removes a recipe from published status.
+	 * @param recipe_id The ID number of the recipe.
+	 * @return JSON response
+	 */
 	@PostMapping("/unpublish/{id}")
 	public ResponseEntity<?> unpublishRecipe(@PathVariable(name="id") int recipe_id) {
 		// use DAO to unpublish recipe
 		boolean result = recipesDataService.recipeUnpublish(recipe_id);
 		
 		if (result) {
+			// recipe unpublished successfully
 			return new ResponseEntity<>(new StatusModel("success", "Recipe is no longer published."), HttpStatus.OK);
 		}
 		
+		// failed to unpublish
 		return new ResponseEntity<>(new StatusModel("error", "Failed to unpublish recipe."), HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 	
