@@ -20,7 +20,7 @@ import com.gcep.model.FoodItemModel;
 /**
  * This class contains the methods for receiving Food Item data from the FatSecret Platform API.
  * @author Gabriel Cepleanu
- * @version 0.1.1
+ * @version 1.1.0
  *
  */
 @Service
@@ -103,10 +103,11 @@ public class ItemsService {
 	 * Returns a list of items with the matching search term.
 	 * Search includes items that contain the specified string.
 	 * @param search_term Search term
+	 * @param page_number Page number of search results
 	 * @return List of Food Item objects
 	 * @throws IOException
 	 */
-	public List<FoodItemModel> searchItems(String search_term) throws IOException {
+	public List<FoodItemModel> searchItems(String search_term, int page_number) throws IOException {
 		// get the access token
 		String tkn = apiTokenManager.getToken();
 		
@@ -116,6 +117,7 @@ public class ItemsService {
 				.queryParam("search_expression", search_term)
 				.queryParam("format", "json")
 				.queryParam("max_results", 10)
+				.queryParam("page_number", page_number)
 				.encode().build()
 				.toUri();
 		

@@ -59,7 +59,7 @@ public class ItemsRESTController {
 	public ResponseEntity<?> searchItems(@RequestBody SearchModel search) {
 		try {
 			// use items service to search for the item
-			List<FoodItemModel> items = itemsService.searchItems(search.getSearch());
+			List<FoodItemModel> items = itemsService.searchItems(search.getSearch(), search.getPageNumber());
 			// return list of items
 			return new ResponseEntity<>(items, HttpStatus.OK);
 		} catch (Exception e) {
